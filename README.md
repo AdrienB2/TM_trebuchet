@@ -1,10 +1,9 @@
 # Trébuchet
 
-Trébuchet est un simulateur de trébuchet écrit en pyhon. Il a été créé dans le carde de notre TM (travail de maturité) au Gymnase de Renens en Suisse.
+Trébuchet est un simulateur de trébuchet écrit en pyhon. Il a été créé dans le carde de notre TM (travail de maturité) au Gymnase de Renens en Suisse. Nous avons utilisé la vertion 3.8.5 de python avec la library [pyglet](http://pyglet.org ) pour la partie graphique
 
-## Installation
+## Utilisation
 
-Use the package manager [pip](https://pip.pypa.io/en/stable/) to install foobar.
 
 ```bash
 pip install foobar
