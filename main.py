@@ -57,7 +57,7 @@ positions = [
 ]
 
 for i in positions:
-    pygame.draw.circle(win, (0, 255, 0), (i[1]*10, 0-i[2]*10), 1)
+    pygame.draw.circle(win, (0, 255, 0), (i[1]*10, i[2]*10), 1)
     pygame.display.update()
     pygame.time.delay(100)
 
