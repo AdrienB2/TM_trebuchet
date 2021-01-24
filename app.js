@@ -1,4 +1,8 @@
 function lancer() {
+    if (typeof interval !== 'undefined') { 
+        clearInterval(interval);
+        elem.style.display = "none";
+    }
     var yi = parseFloat(document.getElementById('yi').value);
     var vx = parseFloat(document.getElementById('vx').value);
     var vy = parseFloat(document.getElementById('vy').value);
