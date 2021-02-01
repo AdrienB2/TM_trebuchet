@@ -1,15 +1,13 @@
 function lancer() {
-    if (typeof interval !== 'undefined') { 
-        clearInterval(interval);
-        elem.style.display = "none";
-    }
+    
     var yi = parseFloat(document.getElementById('yi').value);
     var vx = parseFloat(document.getElementById('vx').value);
     var vy = parseFloat(document.getElementById('vy').value);
     var ay = parseFloat(document.getElementById('a').value);
 
     var elem = document.querySelector('.circle'); 
-    var simulation = document.querySelector('.simulation'); 
+    var simulation = document.querySelector('.simulation');
+
     var t = 0;
     var interval = setInterval(frame, 10);
     elem.style.display = "block";
