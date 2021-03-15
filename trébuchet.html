@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<title>Trébuchet 2D</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="css.css">
+	</head>
+	<body>
+		<h1>Visualisation du lancé d'un trébuchet en 2D </h1>
+		<h2>Données:</h2>
+		<form>
+			<label class="donner">Inclinaison [DEG]:</label>
+			<input type="number" id="incl" name="incl" class="inp" value="45"><br>
+			<label class="donner">Coefficient de trainée de la balle:</label>
+			<input type="number" id="cf" name="cf" value=0.5 class="inp"><br>
+			<label class="donner">Masse volumique du fluide entourant la balle [kg par m3]:</label>
+			<input type="number" id="p" name="p" class="inp" value=1.292><br>
+			<label class=donner>Rayon de la balle [m]:</label>
+			<input type="number" id="r" name="r" class="inp" value=0.05><br>
+			<label class="donner">Vitesse [m/s]:</label>
+			<input type="number" id="v" name="v" class="inp" value=10><br>
+			<label class="donner">Accélération gravitationnelle [m/s2]: </label>
+			<input type="number" id="g" name="g" class="inp" value=9.81><br>
+			<label class="donner">Masse de la balle [kg]: </label>
+			<input type="number" id="m" name="m" class="inp" value=0.1><br>
+			<label class="donner">X initial [m]: </label>
+			<input type="number" id="bx_sup" name="bx_sup" class="inp" value=0><br>
+			<label class="donner">Y initial [m]: </label>
+			<input type="number" id="by_sup" name="by_sup" class="inp" value=0><br>
+			<label class="donner">Pas de temps simulé [s]: </label>
+			<input type="number" id="d" name="d" class="inp" value=1e-2><br>
+			<label class="donner">Inclinaison du vent [DEG]:</label>
+			<input type="number" id="ivent" name="ivent" class="inp" value=0><br>
+			<label class="donner">Vitesse du vent:</label>
+			<input type="number" id="vvent" name="vvent" class="inp" value=0><br>
+			<button type="button" onclick="Validation();" id="btn">Valider les données</button>
+			<button type="button" onclick="Vider();" id="btn">Nettoyer le Canevas</button>
+		</form>
+		<h2 id="calc"></h2>
+		<form>
+			<label class="donner" id="A"></label><br>
+			<label class="donner" id="V"></label><br>
+			<label class="donner" id="vx"></label><br>
+			<label class="donner" id="vy"></label><br>
+			<label class="donner" id="xmax"></label><br>
+			<label class="donner" id="ymax"></label><br>
+		</form><br>
+		<form>
+			<label class="donner" id="vf"></label><br>
+			<label class="donner" id="vfx"></label><br>
+			<label class="donner" id="vfy"></label><br>
+			<label class="donner" id="inclf"></label><br>
+			<label class="donner" id="xf"></label><br>
+			<label class="donner" id="yf"></label><br>
+			<label class="donner" id="y"></label><br>
+			<label class="donner" id="dn"></label><br>
+			<label class="donner" id=tp></label><br>
+		</form>
+		<canvas id="MyCanvas" width=600 height=400></canvas>
+		<script>
+			const pi = Math.PI;
+			var incl = document.getElementById("incl").value;
+			var cf = document.getElementById("cf").value;
+			var p = document.getElementById("p").value;
+			var r = document.getElementById("r").value;
+			var v = document.getElementById("v").value;
+			var g = document.getElementById("g").value;
+			var d = document.getElementById("d").value;
+			var m = document.getElementById("m").value;
+			var bx_sup = document.getElementById("bx_sup").value;
+			var by_sup = document.getElementById("by_sup").value;
+			var V = "";
+			var A = "";
+			var vx = "";
+			var vy = "";
+			var x = parseFloat(bx_sup);
+			var y = parseFloat(by_sup);
+			var listex = [];
+			var listey = [];
+			var xmax = 0;
+			var ymax = 0;
+			var can = document.getElementById("MyCanvas");
+			var candraw = can.getContext("2d");
+			var vvent = 0;
+			var ivent = 0;
+			function somme(liste){
+				var tot = 0;
+				for(i=0;i<liste.length;i++){
+					tot += liste.length[i];
+				};
+				return parseFloat(tot)
+				};
+			function Validation(){
+				document.getElementById("calc").innerHTML = "Calculs:"
+				incl = document.getElementById("incl").value;
+				cf = document.getElementById("cf").value;
+				p = document.getElementById("p").value;
+				r = document.getElementById("r").value;
+				v = document.getElementById("v").value;
+				g = document.getElementById("g").value;
+				d = document.getElementById("d").value;
+				m = document.getElementById("m").value;
+				vvent = document.getElementById("vvent").value;
+				ivent = document.getElementById("ivent").value;
+				bx_sup = parseFloat(document.getElementById("bx_sup").value);
+				by_sup = parseFloat(document.getElementById("by_sup").value);
+				listex = [bx_sup]
+				listey = [by_sup]
+				x = bx_sup
+				y = by_sup
+				A = pi*r**2
+				V = 4/3*pi*r**3
+				vx = v*Math.cos(incl/180*pi)
+				vy = v*Math.sin(incl/180*pi)
+				document.getElementById("A").innerHTML = "Aire de la section efficace : "+ A + " [m2]";
+				document.getElementById("V").innerHTML = "Volume de la balle : " + V + " [m3]";
+				document.getElementById("vx").innerHTML = "Vitesse en x : " + vx + " [m/s]";
+				document.getElementById("vy").innerHTML = "Vitesse en y : " + vy + " [m/s]";
+				function inc(vx,vy){
+					return Math.atan(vy/vx)/pi*180
+				};
+				function px(x,cx){
+					return Math.abs(x*cx)
+				};
+				function py(y,cy){
+					return can.height-y*cy
+				};
+				function ft(vx,vy){
+					return cf*p*A*(vx**2+vy**2)/2
+				};
+				vx = vx - vvent*Math.cos(ivent*pi/180)
+				vy = vy - vvent*Math.sin(ivent*pi/180)
+				while(y>=by_sup){
+					ax=(-ft(vx,vy)*Math.cos(incl/180*pi))/m;
+					ay=(-ft(vx,vy)*Math.sin(incl/180*pi)-m*g)/m;
+					x += 1/2*ax*d**2 + vx*d;
+					listex.push(x);
+					y += 1/2*ay*d**2 + vy*d;
+					listey.push(y);
+					vx += ax*d;
+					vy += ay*d;
+					v = (vx**2+vy**2)**0.5;
+					incl = inc(vx,vy);
+				};
+				xmax = Math.max(...listex)+0.1*(Math.max(...listex));
+				ymax = Math.max(...listey)+0.1*(Math.max(...listey));
+				var cx = can.width/(xmax-bx_sup);
+				var cy = can.height/(ymax-by_sup);
+				document.getElementById("xmax").innerHTML = "Xmax="+xmax;
+				document.getElementById("ymax").innerHTML = "Ymax="+ymax;
+				document.getElementById("dn").innerHTML = "Nombre de pas: "+(listex.length-1);
+				document.getElementById("tp").innerHTML = "Temps:"+ ((listex.length-1)*d)+ " [s]";
+				var debut = performance.now();
+				var dessin = setInterval(draw,1);
+				var Ar = [];
+				var i = 0;
+				function draw(){
+					let beginTime = performance.now();
+					candraw.beginPath();
+					candraw.moveTo(px(listex[i],cx), py(listey[i],cy));
+					candraw.lineTo(px(listex[i+1],cx), py(listey[i+1],cy));
+					candraw.closePath();
+					candraw.stroke();
+					i += 1
+					let EndTime = performance.now();
+					Ar.push(EndTime-beginTime)
+					if(i > listex.length-1){
+						clearInterval(dessin)
+					};
+				var fin = performance.now()
+				console.log("Temps:"+(fin-debut))
+				var tot = 0;
+				for(i=0;i<Ar.length;i++){
+					tot += Ar[i];
+				};
+				console.log(tot/Ar.length);
+				};
+			};
+			function Vider(){
+				candraw.clearRect(0,0,can.width,can.height);
+			};
+		</script>
+	</body>
+</html>
