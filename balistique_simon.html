@@ -71,7 +71,7 @@ function run() {
   , 5); //remet à zéro la simulation
   }
 //cercle sur le canvas
- function drawCircle(myCircle, context) {
+function drawCircle(myCircle, context) {
   context.beginPath();
   context.arc(Math.floor(myCircle.x), Math.floor(myCircle.y), myCircle.mass, 0, 2 * Math.PI, false); //forme du cercle
   context.fillStyle = '#114'; //couleur, remplissage et épaisseur 
