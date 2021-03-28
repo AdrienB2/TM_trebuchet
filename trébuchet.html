@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+	<head>
+		<title>Trébuchet 2D</title>
+		<meta charset="utf-8">
+		<link rel="stylesheet" href="css.css">
+	</head>
+	<body>
+		<h1>Visualisation du lancé d'un trébuchet en 2D</h1>
+		<h2>Données:</h2>
+		<form>
+			<label class="donner">Inclinaison [DEG]:</label>
+			<input type="number" id="incl" name="incl" class="inp" value="45"><br>
+			<label class="donner">Coefficient de trainée de la balle:</label>
+			<input type="number" id="cf" name="cf" value=0.5 class="inp"><br>
+			<label class="donner">Masse volumique du fluide entourant la balle [kg par m3]:</label>
+			<input type="number" id="p" name="p" class="inp" value=1.292><br>
+			<label class=donner>Rayon de la balle [m]:</label>
+			<input type="number" id="r" name="r" class="inp" value=0.05><br>
+			<label class="donner">Vitesse [m/s]:</label>
+			<input type="number" id="v" name="v" class="inp" value=10><br>
+			<label class="donner">Accélération gravitationnelle [m/s2]: </label>
+			<input type="number" id="g" name="g" class="inp" value=9.81><br>
+			<label class="donner">Masse de la balle [kg]: </label>
+			<input type="number" id="m" name="m" class="inp" value=0.1><br>
+			<label class="donner">X initial [m]: </label>
+			<input type="number" id="bx_sup" name="bx_sup" class="inp" value=0><br>
+			<label class="donner">Y initial [m]: </label>
+			<input type="number" id="by_sup" name="by_sup" class="inp" value=0><br>
+			<label class="donner">Pas de temps simulé [s]: </label>
+			<input type="number" id="d" name="d" class="inp" value=1e-2><br>
+			<label class="donner">Inclinaison du vent [DEG]:</label>
+			<input type="number" id="ivent" name="ivent" class="inp" value=0><br>
+			<label class="donner">Vitesse du vent [m/s]:</label>
+			<input type="number" id="vvent" name="vvent" class="inp" value=0><br>
+			<label class="donner">Ralenti:</label>
+			<input type="number" id="ralenti" name="ralenti" class="inp" value=1>
+		</form>
+		<h2 id="calc"></h2>
+		<form>
+			<label class="donner" id="A"></label><br>
+			<label class="donner" id="V"></label><br>
+			<label class="donner" id="vx"></label><br>
+			<label class="donner" id="vy"></label><br>
+			<label class="donner" id="xmax"></label><br>
+			<label class="donner" id="ymax"></label><br>
+		</form><br>
+		<h2 id="tvaleurs"></h2>
+		<form>
+			<label class="donner" id="vf"></label><br>
+			<label class="donner" id="inclf"></label><br>
+			<label class="donner" id="xf"></label><br>
+			<label class="donner" id="yf"></label><br>
+			<label class="donner" id="dn"></label><br>
+			<label class="donner" id="tp"></label>
+		</form>
+			<canvas id="MyCanvas" width=600 height=400></canvas><br>
+			<button type="button" onclick="Validation();" id="btn">Valider les données</button>
+			<button type="button" onclick="Vider();" id="btn">Nettoyer le Canevas</button>
+		<button type="button" onclick="Stop();" id="btn1">Figer</button>
+		<script>
+			const pi = Math.PI;
+			var can = document.getElementById("MyCanvas");
+			var candraw = can.getContext("2d");
+			var xmax = 0;
+			var ymax = 0;
+			function arrondi(a,b){
+				return (Math.floor(a/b))*b;
+			};
+			function miax(liste){
+				let min = liste[0], max=liste[0]
+				for(let i=1;i<liste.length;i++){
+					if(liste[i]>max){
+						max=liste[i];
+					}else if(liste[i]<min){
+						min=liste[i];
+					};
+				}
+				return [max, min]
+			};
+			function Validation(){
+				document.getElementById("calc").innerHTML = "Calculs:"
+				var incl = document.getElementById("incl").value;
+				var cf = document.getElementById("cf").value;
+				var p = document.getElementById("p").value;
+				var r = document.getElementById("r").value;
+				var v = document.getElementById("v").value;
+				var g = document.getElementById("g").value;
+				var d = document.getElementById("d").value;
+				var m = document.getElementById("m").value;
+				var vvent = document.getElementById("vvent").value;
+				var ivent = document.getElementById("ivent").value;
+				var bx_sup = parseFloat(document.getElementById("bx_sup").value);
+				var by_sup = parseFloat(document.getElementById("by_sup").value);
+				var ralenti = document.getElementById("ralenti").value;
+				var listex = [bx_sup];
+				var listey = [by_sup];
+				var listev = [v];
+				var listeincl = [incl];
+				var x = bx_sup;
+				var y = by_sup;
+				A = pi*r**2;
+				V = 4/3*pi*r**3;
+				vx = v*Math.cos(incl/180*pi);
+				vy = v*Math.sin(incl/180*pi);
+				document.getElementById("A").innerHTML = "Aire de la section efficace : "+ A + " [m2]";
+				document.getElementById("V").innerHTML = "Volume de la balle : " + V + " [m3]";
+				document.getElementById("vx").innerHTML = "Vitesse en x : " + vx + " [m/s]";
+				document.getElementById("vy").innerHTML = "Vitesse en y : " + vy + " [m/s]";
+				function inc(vx,vy){
+					return Math.atan(vy/vx)/pi*180
+				};
+				function px(x,cx){
+					return Math.abs(x*cx)
+				};
+				function py(y,cy){
+					return can.height-y*cy
+				};
+				function ft(vx,vy){
+					return cf*p*A*(vx**2+vy**2)/2
+				};
+				vx = vx - vvent*Math.cos(ivent*pi/180)
+				vy = vy - vvent*Math.sin(ivent*pi/180)
+				var debut1 = performance.now();
+				while(y>=by_sup){
+					ax=(-ft(vx,vy)*Math.cos(incl/180*pi))/m;
+					ay=(-ft(vx,vy)*Math.sin(incl/180*pi)-m*g)/m;
+					x += 1/2*ax*d**2 + vx*d;
+					listex.push(x);
+					y += 1/2*ay*d**2 + vy*d;
+					listey.push(y);
+					vx += ax*d;
+					vy += ay*d;
+					v = (vx**2+vy**2)**0.5;
+					listev.push(v);
+					incl = inc(vx,vy);
+					listeincl.push(incl);
+				};
+				/*if(miax(listex)[0]>xmax){
+					xmax = miax(listex)[0]
+				};
+				if(miax(listey)[0]>ymax){
+					ymax=miax(listey)[0]
+				};*/
+				if(xmax == 0 && ymax == 0){
+					xmax=miax(listex)[0];
+					ymax=miax(listey)[0];
+				};
+				var cx = can.width/(xmax-bx_sup);
+				var cy = can.height/(ymax-by_sup);
+				var c = 0;
+				if(cx <= cy){
+					c = cx
+				}else if(cx > cy){
+					c = cy
+				};
+				c = c/(1+0.1);
+				var fin1 = performance.now();
+				console.log("Temps de calculs: "+(fin1-debut1)/1000+" [s]")
+				document.getElementById("xmax").innerHTML = "Xmax="+miax(listex)[0]+" [m]";
+				document.getElementById("ymax").innerHTML = "Ymax="+miax(listey)[0]+" [m]";
+				document.getElementById("dn").innerHTML = "Nombre de pas: "+(listex.length-1);
+				var debut = performance.now();
+				document.getElementById("tvaleurs").innerHTML="Valeurs en temps réel:";
+				var i = 0;
+				dessin = setInterval(draw,d*1000*ralenti);
+				function draw(){
+					let beginTime = performance.now();
+					if(i < listex.length-1){
+					document.getElementById("xf").innerHTML="Position x: "+listex[i]+" [m]";
+					document.getElementById("yf").innerHTML="Position y: "+listey[i]+" [m]";
+					document.getElementById("dn").innerHTML="Pas n°"+(i+1);
+					document.getElementById("vf").innerHTML="Vitesse: "+listev[i]+" [m/s]";
+					document.getElementById("inclf").innerHTML="Inclinaison: "+listeincl[i]+" [°]";
+					document.getElementById("tp").innerHTML = "Temps: "+((i+1)*d)+ " [s]";
+					};
+					/*candraw.clearRect(0,0,can.width,can.height)
+					candraw.beginPath();
+					candraw.arc(px(listex[i+1],c),py(listey[i+1],c),r*c,0,2*pi);
+					candraw.fill();*/
+					candraw.beginPath();
+					candraw.strokeStyle = "blue";
+					candraw.strokeStyle = "40px";
+					candraw.moveTo(px(listex[i],c), py(listey[i],c));
+					candraw.lineTo(px(listex[i+1],c), py(listey[i+1],c));
+					candraw.stroke();
+					i += 1;
+					let EndTime = performance.now();
+					if(i > listex.length-1){
+						clearInterval(dessin);
+						var fin = performance.now();
+						console.log("Temps d'exécution: "+((fin-debut)/1000-d*ralenti)+" [s]")
+					};
+				};
+			};
+			function Stop(){
+				if(document.getElementById("btn1").value == "Figer"){
+					document.getElementById("btn1").innerHTML="Relancer";
+				};
+				if(document.getElementById("btn1").value = "Relancer"){
+					document.getElementById("btn1").innerHTML="Figer";
+				};
+			};
+			function Vider(){
+				candraw.clearRect(0,0,can.width,can.height);
+				xmax = 0;
+				ymax = 0;
+			};
+		</script>
+	</body>
+</html>
