@@ -10,25 +10,23 @@
         <h1>Trébuchet</h1>
         <div class="menu">
             <form>
-                <label for="vx">Vitesse initiale sur x</label>
-                <input type="text" id="vx" value="50">
+                <label for="v">Vitesse initiale</label><br>
+                <input type="text" id="v" value="50">
                 <br>
-                <label for="vy">Vitesse initiale sur y</label>
-                <input type="text" id="vy" value="50">
+                <label for="a">Angle</label><br>
+                <input type="text" id="a" value="50">
                 <br>
-                <label for="yi">Hauteur initiale</label>
+                <label for="yi">Hauteur initiale</label><br>
                 <input type="text" id="yi" value="100">
                 <br>
-                <label for="a">Accélération</label>
-                <input type="text" id="a" value="-9.81">
+                <label for="g">Accélération</label>
+                <input type="text" id="g" value="-9.81">
                 <br>
                 <input type="button" id="startBtn" value="Lancer" onclick="lancer()"/>
+                <input type="button" value="rotate" onclick="rotate()">
             </form>
         </div>
         <canvas class="simulation" id = "simulation"></canvas>
-        <!-- <div class="simulation">
-            <div class="circle"></div>
-        </div> -->
         <script src="app.js"></script>
     </body>
 </html>
