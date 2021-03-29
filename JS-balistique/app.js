@@ -4,7 +4,7 @@ simulation.height = 500;
 
 var c = simulation.getContext("2d");
 
-function drawTrebuchet(a, stopAngle) {
+function drawTrebuchet(a) {
     c.lineWidth = 2.5;
     c.strokeStyle = "#fff";
     c.clearRect(0, 0, simulation.width, simulation.height);
@@ -18,14 +18,22 @@ function drawTrebuchet(a, stopAngle) {
     c.lineTo(200 + Math.cos(a * Math.PI /180) * 75, simulation.height - 150 + Math.sin(a * Math.PI /180) * 75);
     c.stroke();
 }
-drawTrebuchet(0, 0);
+drawTrebuchet(0);
+isRotating = false;
+var rotInt;
 function rotate() {
-    angle = 0;
-    stopAngle = 45;
-    var interval = setInterval(function () {
-        drawTrebuchet(angle, stopAngle);
-        angle += 1;
-    }, 10)
+    if (!isRotating) {
+        angle = 0;
+        stopAngle = 45;
+        rotInt = setInterval(function () {
+            drawTrebuchet(angle);
+            angle += 1;
+        }, 10)
+        isRotating = true;
+    } else {
+        clearInterval(rotInt);
+        isRotating = false;
+    }
     
 }
 function lancer() {
