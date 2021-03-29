@@ -2,21 +2,36 @@ var simulation = document.getElementById('simulation');
 simulation.width = window.innerWidth;
 simulation.height = 500;
 
-var c = simulation.getContext("2d");
+var ctx = simulation.getContext("2d");
 
-function drawTrebuchet(a) {
-    c.lineWidth = 2.5;
-    c.strokeStyle = "#fff";
-    c.clearRect(0, 0, simulation.width, simulation.height);
-    c.beginPath();
-    c.moveTo(200, simulation.height);
-    c.lineTo(200, simulation.height - 150); 
-    c.stroke();
-    c.beginPath();
-    c.moveTo(200 - Math.cos(a * Math.PI /180) * 75, simulation.height - 100 - Math.sin(a * Math.PI /180) * 75);
-    c.lineTo(200 - Math.cos(a * Math.PI /180) * 75, simulation.height - 150 - Math.sin(a * Math.PI /180) * 75);
-    c.lineTo(200 + Math.cos(a * Math.PI /180) * 75, simulation.height - 150 + Math.sin(a * Math.PI /180) * 75);
-    c.stroke();
+function drawTrebuchet(ang) {
+    
+    var lengthAB = parseFloat(document.getElementById('fronde').value);
+    var lengthBC = parseFloat(document.getElementById('longArm').value);
+    var lengthCD = parseFloat(document.getElementById('shortArm').value);
+    var lengthDE = parseFloat(document.getElementById('weightLenth').value);
+    var height = parseFloat(document.getElementById('pivotHeight').value);
+
+    var c = { x: lengthBC + 200, y: simulation.height - height };
+    var b = { x: c.x - Math.cos(ang * Math.PI / 180) * lengthBC, y: c.y - Math.sin(ang * Math.PI / 180) * lengthBC };
+    var a = { x: b.x, y: b.y + lengthAB };
+    var d = { x: c.x + Math.cos(ang * Math.PI / 180) * lengthCD, y: c.y + Math.sin(ang * Math.PI / 180) * lengthCD };
+    var e = { x: d.x, y: d.y + lengthDE };
+
+    ctx.lineWidth = 2.5;
+    ctx.strokeStyle = "#fff";
+    ctx.clearRect(0, 0, simulation.width, simulation.height);
+    ctx.beginPath();
+    ctx.moveTo(c.x - 25, simulation.height);
+    ctx.lineTo(c.x, c.y); 
+    ctx.lineTo(c.x + 25, simulation.height); 
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
+    ctx.lineTo(d.x, d.y);
+    ctx.lineTo(e.x, e.y);
+    ctx.stroke();
 }
 drawTrebuchet(0);
 isRotating = false;
@@ -59,21 +74,21 @@ function lancer() {
             startButton.disabled = false;
         }
         else {
-            c.clearRect(0, 0, simulation.width, simulation.height);
+            ctx.clearRect(0, 0, simulation.width, simulation.height);
             pos.push([x, y]);
-            c.moveTo(pos[0].x, pos[0].y);
-            c.beginPath();
+            ctx.moveTo(pos[0].x, pos[0].y);
+            ctx.beginPath();
             for (let i = 1; i < pos.length; i++) {
                 const element = pos[i];
-                c.lineTo(element[0], element[1]);
+                ctx.lineTo(element[0], element[1]);
             }
-            c.lineWidth = 2.5;
-            c.strokeStyle = "#1CC1BC";
-            c.stroke();
-            c.beginPath();
-            c.arc(x, y, 10, 0, 2 * Math.PI, false); //forme du rond
-            c.fillStyle = '#fff'; //couleur, remplissage et épaisseur 
-            c.fill();
+            ctx.lineWidth = 2.5;
+            ctx.strokeStyle = "#1CC1BC";
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.arc(x, y, 10, 0, 2 * Math.PI, false); //forme du rond
+            ctx.fillStyle = '#fff'; //couleur, remplissage et épaisseur 
+            ctx.fill();
             t += 10;
         }
     }
