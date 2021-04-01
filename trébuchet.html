@@ -33,26 +33,32 @@
 			<input type="number" id="ivent" name="ivent" class="inp" value=0><br>
 			<label class="donner">Vitesse du vent [m/s]:</label>
 			<input type="number" id="vvent" name="vvent" class="inp" value=0><br>
+			<label class="donner">Vitesse angulaire [DEG/s]</label>
+			<input type="number" id="w" name="vitesse_angulaire" class="inp" value=0><br>
 			<label class="donner">Ralenti:</label>
 			<input type="number" id="ralenti" name="ralenti" class="inp" value=1>
 		</form>
 		<h2 id="calc"></h2>
+		<! formulaire des calculs>
 		<form>
 			<label class="donner" id="A"></label><br>
 			<label class="donner" id="V"></label><br>
+			<label class="donner" id="mv"></label><br>
 			<label class="donner" id="vx"></label><br>
 			<label class="donner" id="vy"></label><br>
 			<label class="donner" id="xmax"></label><br>
 			<label class="donner" id="ymax"></label><br>
+			<label class="donner" id="t"></label>
 		</form><br>
 		<h2 id="tvaleurs"></h2>
+		<! formulaire des valeurs en temps réel>
 		<form>
 			<label class="donner" id="vf"></label><br>
 			<label class="donner" id="inclf"></label><br>
 			<label class="donner" id="xf"></label><br>
 			<label class="donner" id="yf"></label><br>
 			<label class="donner" id="dn"></label><br>
-			<label class="donner" id="tp"></label>
+			<label class="donner" id="tr"></label>
 		</form>
 			<canvas id="MyCanvas" width=600 height=400></canvas><br>
 			<button type="button" onclick="Validation();" id="btn">Valider les données</button>
@@ -67,7 +73,7 @@
 			function arrondi(a,b){
 				return (Math.floor(a/b))*b;
 			};
-			function miax(liste){
+			function miax(liste){	/*fonction pour calculer le max et le min d'une liste*/
 				let min = liste[0], max=liste[0]
 				for(let i=1;i<liste.length;i++){
 					if(liste[i]>max){
@@ -88,6 +94,7 @@
 				var g = document.getElementById("g").value;
 				var d = document.getElementById("d").value;
 				var m = document.getElementById("m").value;
+				var w = document.getElementById("w").value;
 				var vvent = document.getElementById("vvent").value;
 				var ivent = document.getElementById("ivent").value;
 				var bx_sup = parseFloat(document.getElementById("bx_sup").value);
@@ -96,7 +103,7 @@
 				var listex = [bx_sup];
 				var listey = [by_sup];
 				var listev = [v];
-				var listeincl = [incl];
+				var listeincl = [];
 				var x = bx_sup;
 				var y = by_sup;
 				A = pi*r**2;
@@ -105,26 +112,37 @@
 				vy = v*Math.sin(incl/180*pi);
 				document.getElementById("A").innerHTML = "Aire de la section efficace : "+ A + " [m2]";
 				document.getElementById("V").innerHTML = "Volume de la balle : " + V + " [m3]";
+				document.getElementById("mv").innerHTML = "Masse volumique de la balle : "+(m/V)+" [kg/m3]";
 				document.getElementById("vx").innerHTML = "Vitesse en x : " + vx + " [m/s]";
 				document.getElementById("vy").innerHTML = "Vitesse en y : " + vy + " [m/s]";
-				function inc(vx,vy){
-					return Math.atan(vy/vx)/pi*180
+				function inc(vx,v){
+					if(vx>=0){
+						return Math.atan(vy/vx)/pi*180
+					}else{
+						return 180+Math.atan(vy/vx)/pi*180
+					};
 				};
 				function px(x,cx){
-					return Math.abs(x*cx)
+					return cx*x
 				};
 				function py(y,cy){
 					return can.height-y*cy
 				};
-				function ft(vx,vy){
-					return cf*p*A*(vx**2+vy**2)/2
+				function ft(v){
+					return cf*p*A*v**2/2
+				};
+				function fm(v){
+					return 0.5*pi*p*r**3*w/180*pi*v
+				};
+				function fA(V){
+					return p*V*g
 				};
 				vx = vx - vvent*Math.cos(ivent*pi/180)
 				vy = vy - vvent*Math.sin(ivent*pi/180)
 				var debut1 = performance.now();
-				while(y>=by_sup){
-					ax=(-ft(vx,vy)*Math.cos(incl/180*pi))/m;
-					ay=(-ft(vx,vy)*Math.sin(incl/180*pi)-m*g)/m;
+				while(y>=0){
+					ax=(-ft(v)*Math.cos(incl/180*pi)+fm(v)*Math.sin(incl/180*pi)+fA(V))/m;
+					ay=(-ft(v)*Math.sin(incl/180*pi)-m*g-fm(v)*Math.cos(incl/180*pi))/m;
 					x += 1/2*ax*d**2 + vx*d;
 					listex.push(x);
 					y += 1/2*ay*d**2 + vy*d;
@@ -133,8 +151,8 @@
 					vy += ay*d;
 					v = (vx**2+vy**2)**0.5;
 					listev.push(v);
-					incl = inc(vx,vy);
 					listeincl.push(incl);
+					incl = inc(vx,vy);
 				};
 				/*if(miax(listex)[0]>xmax){
 					xmax = miax(listex)[0]
@@ -143,23 +161,27 @@
 					ymax=miax(listey)[0]
 				};*/
 				if(xmax == 0 && ymax == 0){
-					xmax=miax(listex)[0];
-					ymax=miax(listey)[0];
+					if(miax(listex)[1]<bx_sup){
+						xmax = bx_sup;
+					};
+					xmax=Math.abs(miax(listex)[0]);
+					ymax=Math.abs(miax(listey)[0]);
 				};
-				var cx = can.width/(xmax-bx_sup);
-				var cy = can.height/(ymax-by_sup);
+				var cx = can.width/(xmax);
+				var cy = can.height/(ymax);
 				var c = 0;
 				if(cx <= cy){
 					c = cx
 				}else if(cx > cy){
 					c = cy
 				};
-				c = c/(1+0.1);
+				c = c/(1+0.1); /*0.1 est un coefficient qui fait diminuer la taille dans le canvas pour qu'elle soit plus visible*/
 				var fin1 = performance.now();
 				console.log("Temps de calculs: "+(fin1-debut1)/1000+" [s]")
-				document.getElementById("xmax").innerHTML = "Xmax="+miax(listex)[0]+" [m]";
-				document.getElementById("ymax").innerHTML = "Ymax="+miax(listey)[0]+" [m]";
-				document.getElementById("dn").innerHTML = "Nombre de pas: "+(listex.length-1);
+				document.getElementById("xmax").innerHTML = "Xmax : "+xmax+" [m]";
+				document.getElementById("ymax").innerHTML = "Ymax : "+ymax+" [m]";
+				document.getElementById("dn").innerHTML = "Nombre de pas : "+(listex.length-1);
+				document.getElementById("t").innerHTML = "Durée de vol : " + (listex.length-1)*d+" [s]";
 				var debut = performance.now();
 				document.getElementById("tvaleurs").innerHTML="Valeurs en temps réel:";
 				var i = 0;
@@ -172,7 +194,7 @@
 					document.getElementById("dn").innerHTML="Pas n°"+(i+1);
 					document.getElementById("vf").innerHTML="Vitesse: "+listev[i]+" [m/s]";
 					document.getElementById("inclf").innerHTML="Inclinaison: "+listeincl[i]+" [°]";
-					document.getElementById("tp").innerHTML = "Temps: "+((i+1)*d)+ " [s]";
+					document.getElementById("tr").innerHTML = "Temps: "+((i+1)*d)+ " [s]";
 					};
 					/*candraw.clearRect(0,0,can.width,can.height)
 					candraw.beginPath();
@@ -180,7 +202,6 @@
 					candraw.fill();*/
 					candraw.beginPath();
 					candraw.strokeStyle = "blue";
-					candraw.strokeStyle = "40px";
 					candraw.moveTo(px(listex[i],c), py(listey[i],c));
 					candraw.lineTo(px(listex[i+1],c), py(listey[i+1],c));
 					candraw.stroke();
