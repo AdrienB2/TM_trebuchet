@@ -1,6 +1,6 @@
 var simulation = document.getElementById('simulation');
 simulation.width = window.innerWidth;
-simulation.height = 500;
+simulation.height = window.innerHeight - 100;
 
 var ctx = simulation.getContext("2d");
 
