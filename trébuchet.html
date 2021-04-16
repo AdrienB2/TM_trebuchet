@@ -48,7 +48,8 @@
 			<label class="donner" id="vy"></label><br>
 			<label class="donner" id="xmax"></label><br>
 			<label class="donner" id="ymax"></label><br>
-			<label class="donner" id="t"></label>
+			<label class="donner" id="t"></label><br>
+			<label class="donner" id="dn"></label>
 		</form><br>
 		<h2 id="tvaleurs"></h2>
 		<! formulaire des valeurs en temps réel>
@@ -57,19 +58,46 @@
 			<label class="donner" id="inclf"></label><br>
 			<label class="donner" id="xf"></label><br>
 			<label class="donner" id="yf"></label><br>
-			<label class="donner" id="dn"></label><br>
-			<label class="donner" id="tr"></label>
+			<label class="donner" id="tr"></label><br>
+			<label class="donner" id="dnr"></label>
 		</form>
-			<canvas id="MyCanvas" width=600 height=400></canvas><br>
-			<button type="button" onclick="Validation();" id="btn">Valider les données</button>
-			<button type="button" onclick="Vider();" id="btn">Nettoyer le Canevas</button>
-		<button type="button" onclick="Stop();" id="btn1">Figer</button>
-		<script>
+			<canvas id="MyCanvas" width=600 height=338></canvas><br>
+			<button type="button" onclick="Validation();" id="launchcalcul">Calculer</button>
+			<button type="button" onclick="Lancer(0);" id="launchbutton">Lancer</button>
+			<button type="button" onclick="Vider();" id="vide">Clear</button>
+			<button type="button" onclick="Stop();" id="arret">Stop</button>
+			<button type="button" onclick="BigStop();" id="grdarret">Arrêt définitif du tracé</button>
+ 		<script>
 			const pi = Math.PI;
 			var can = document.getElementById("MyCanvas");
 			var candraw = can.getContext("2d");
+			var incl = document.getElementById("incl").value;
+			var cf = document.getElementById("cf").value;
+			var p = document.getElementById("p").value;
+			var r = document.getElementById("r").value;
+			var v = document.getElementById("v").value;
+			var g = document.getElementById("g").value;
+			var d = document.getElementById("d").value;
+			var m = document.getElementById("m").value;
+			var w = document.getElementById("w").value;
+			var vvent = document.getElementById("vvent").value;
+			var ivent = document.getElementById("ivent").value;
+			var bx_sup = parseFloat(document.getElementById("bx_sup").value);
+			var by_sup = parseFloat(document.getElementById("by_sup").value);
+			var ralenti = document.getElementById("ralenti").value;
+			var listex = [bx_sup];
+			var listey = [by_sup];
+			var listev = [v];
+			var listeincl = [incl];
+			var x = bx_sup;
+			var y = by_sup;
+			//candraw.globalCompositeOperation= "hard-light";
 			var xmax = 0;
 			var ymax = 0;
+			var c = 0;
+			document.getElementById("launchbutton").disabled = true;
+			document.getElementById("arret").disabled = true;
+			document.getElementById("grdarret").disabled = true;
 			function arrondi(a,b){
 				return (Math.floor(a/b))*b;
 			};
@@ -81,31 +109,54 @@
 					}else if(liste[i]<min){
 						min=liste[i];
 					};
-				}
+				};
 				return [max, min]
 			};
+			function inc(vx,v){
+				if(vx>=0){
+					return Math.atan(vy/vx)/pi*180
+				}else{
+					return 180+Math.atan(vy/vx)/pi*180
+				};
+			};
+			function px(x,cx){
+				return cx*x
+			};
+			function py(y,cy){
+				return can.height-y*cy
+			};
+			function ft(v){
+				return cf*p*A*v**2/2
+			};
+			function fm(v){
+				return 0.5*pi*p*r**3*w/180*pi*v
+			};
+			function fA(V){
+				return p*V*g
+			};
 			function Validation(){
+				document.getElementById("launchcalcul").disabled = true;
 				document.getElementById("calc").innerHTML = "Calculs:"
-				var incl = document.getElementById("incl").value;
-				var cf = document.getElementById("cf").value;
-				var p = document.getElementById("p").value;
-				var r = document.getElementById("r").value;
-				var v = document.getElementById("v").value;
-				var g = document.getElementById("g").value;
-				var d = document.getElementById("d").value;
-				var m = document.getElementById("m").value;
-				var w = document.getElementById("w").value;
-				var vvent = document.getElementById("vvent").value;
-				var ivent = document.getElementById("ivent").value;
-				var bx_sup = parseFloat(document.getElementById("bx_sup").value);
-				var by_sup = parseFloat(document.getElementById("by_sup").value);
-				var ralenti = document.getElementById("ralenti").value;
-				var listex = [bx_sup];
-				var listey = [by_sup];
-				var listev = [v];
-				var listeincl = [];
-				var x = bx_sup;
-				var y = by_sup;
+				incl = document.getElementById("incl").value;
+				cf = document.getElementById("cf").value;
+				p = document.getElementById("p").value;
+				r = document.getElementById("r").value;
+				v = document.getElementById("v").value;
+				g = document.getElementById("g").value;
+				d = document.getElementById("d").value;
+				m = document.getElementById("m").value;
+				w = document.getElementById("w").value;
+				vvent = document.getElementById("vvent").value;
+				ivent = document.getElementById("ivent").value;
+				bx_sup = parseFloat(document.getElementById("bx_sup").value);
+				by_sup = parseFloat(document.getElementById("by_sup").value);
+				ralenti = document.getElementById("ralenti").value;
+				listex = [bx_sup];
+				listey = [by_sup];
+				listev = [v];
+				listeincl = [incl];
+				x = bx_sup;
+				y = by_sup;
 				A = pi*r**2;
 				V = 4/3*pi*r**3;
 				vx = v*Math.cos(incl/180*pi);
@@ -115,31 +166,9 @@
 				document.getElementById("mv").innerHTML = "Masse volumique de la balle : "+(m/V)+" [kg/m3]";
 				document.getElementById("vx").innerHTML = "Vitesse en x : " + vx + " [m/s]";
 				document.getElementById("vy").innerHTML = "Vitesse en y : " + vy + " [m/s]";
-				function inc(vx,v){
-					if(vx>=0){
-						return Math.atan(vy/vx)/pi*180
-					}else{
-						return 180+Math.atan(vy/vx)/pi*180
-					};
-				};
-				function px(x,cx){
-					return cx*x
-				};
-				function py(y,cy){
-					return can.height-y*cy
-				};
-				function ft(v){
-					return cf*p*A*v**2/2
-				};
-				function fm(v){
-					return 0.5*pi*p*r**3*w/180*pi*v
-				};
-				function fA(V){
-					return p*V*g
-				};
 				vx = vx - vvent*Math.cos(ivent*pi/180)
 				vy = vy - vvent*Math.sin(ivent*pi/180)
-				var debut1 = performance.now();
+				let debut = performance.now();
 				while(y>=0){
 					ax=(-ft(v)*Math.cos(incl/180*pi)+fm(v)*Math.sin(incl/180*pi)+fA(V))/m;
 					ay=(-ft(v)*Math.sin(incl/180*pi)-m*g-fm(v)*Math.cos(incl/180*pi))/m;
@@ -151,15 +180,9 @@
 					vy += ay*d;
 					v = (vx**2+vy**2)**0.5;
 					listev.push(v);
-					listeincl.push(incl);
 					incl = inc(vx,vy);
+					listeincl.push(incl);
 				};
-				/*if(miax(listex)[0]>xmax){
-					xmax = miax(listex)[0]
-				};
-				if(miax(listey)[0]>ymax){
-					ymax=miax(listey)[0]
-				};*/
 				if(xmax == 0 && ymax == 0){
 					if(miax(listex)[1]<bx_sup){
 						xmax = bx_sup;
@@ -169,63 +192,114 @@
 				};
 				var cx = can.width/(xmax);
 				var cy = can.height/(ymax);
-				var c = 0;
 				if(cx <= cy){
 					c = cx
 				}else if(cx > cy){
 					c = cy
 				};
 				c = c/(1+0.1); /*0.1 est un coefficient qui fait diminuer la taille dans le canvas pour qu'elle soit plus visible*/
-				var fin1 = performance.now();
-				console.log("Temps de calculs: "+(fin1-debut1)/1000+" [s]")
+				let fin = performance.now();
+				console.log("Temps de calculs: "+(fin-debut)/1000+" [s]")
 				document.getElementById("xmax").innerHTML = "Xmax : "+xmax+" [m]";
 				document.getElementById("ymax").innerHTML = "Ymax : "+ymax+" [m]";
 				document.getElementById("dn").innerHTML = "Nombre de pas : "+(listex.length-1);
 				document.getElementById("t").innerHTML = "Durée de vol : " + (listex.length-1)*d+" [s]";
-				var debut = performance.now();
+				document.getElementById("launchbutton").disabled = false;
+				document.getElementById("launchcalcul").disabled = false;
+			};
+			var sauv = 0;
+			var binary = 0;
+			function Lancer(i){
+				let debut = performance.now();
 				document.getElementById("tvaleurs").innerHTML="Valeurs en temps réel:";
-				var i = 0;
+				document.getElementById("launchbutton").disabled = true;
+				document.getElementById("launchcalcul").disabled = true;
+				document.getElementById("arret").disabled = false;
+				document.getElementById("grdarret").disabled = false;
+				binary = 0;
 				dessin = setInterval(draw,d*1000*ralenti);
 				function draw(){
-					let beginTime = performance.now();
 					if(i < listex.length-1){
 					document.getElementById("xf").innerHTML="Position x: "+listex[i]+" [m]";
 					document.getElementById("yf").innerHTML="Position y: "+listey[i]+" [m]";
-					document.getElementById("dn").innerHTML="Pas n°"+(i+1);
+					document.getElementById("dnr").innerHTML="Pas n°"+(i+1);
 					document.getElementById("vf").innerHTML="Vitesse: "+listev[i]+" [m/s]";
 					document.getElementById("inclf").innerHTML="Inclinaison: "+listeincl[i]+" [°]";
 					document.getElementById("tr").innerHTML = "Temps: "+((i+1)*d)+ " [s]";
+					}else{
+					document.getElementById("yf").innerHTML="Position y: 0.000 [m]";
 					};
-					/*candraw.clearRect(0,0,can.width,can.height)
+					function retrace(b,a){
+						candraw.beginPath();
+						for(let k=b;k<a;k++){
+							candraw.moveTo(px(listex[k],c),py(listey[k],c))
+							candraw.lineTo(px(listex[k+1],c),py(listey[k+1],c))};
+						candraw.strokeStyle = "blue";
+						candraw.stroke();
+					};
+					candraw.beginPath();
+					candraw.arc(px(listex[i],c),py(listey[i],c),r*c+0.64,0,2*pi);
+					candraw.fillStyle = "white";
+					candraw.fill();
+					var deltax = (listex[i]-listex[i-1]);
+					var deltay = (listey[i]-listey[i-1]);
+					if((deltax**2+deltay**2)**0.5<r){
+						let a = 1;
+						while((deltax**2+deltay**2)**0.5<r){
+							if(a>i){
+								break
+							};
+							deltax=listex[i]-listex[i-a];
+							deltay=listey[i]-listey[i-a];
+							a+=1;};
+						retrace(i-a,i+1);}else{retrace(i-1,i+1);};
 					candraw.beginPath();
 					candraw.arc(px(listex[i+1],c),py(listey[i+1],c),r*c,0,2*pi);
-					candraw.fill();*/
-					candraw.beginPath();
-					candraw.strokeStyle = "blue";
-					candraw.moveTo(px(listex[i],c), py(listey[i],c));
-					candraw.lineTo(px(listex[i+1],c), py(listey[i+1],c));
-					candraw.stroke();
+					candraw.fillStyle = "black";
+					candraw.fill();
+					sauv = i;
+					//retrace(i,i+1);
 					i += 1;
-					let EndTime = performance.now();
 					if(i > listex.length-1){
 						clearInterval(dessin);
-						var fin = performance.now();
+						let fin = performance.now();
 						console.log("Temps d'exécution: "+((fin-debut)/1000-d*ralenti)+" [s]")
+						document.getElementById("launchcalcul").disabled = false;
+						document.getElementById("launchbutton").disabled = false;
+						document.getElementById("arret").disabled = true;
+						document.getElementById("grdarret").disabled = true;
+						binary = 0;
+						document.getElementById("arret").innerHTML="Stop";
 					};
 				};
 			};
 			function Stop(){
-				if(document.getElementById("btn1").value == "Figer"){
-					document.getElementById("btn1").innerHTML="Relancer";
-				};
-				if(document.getElementById("btn1").value = "Relancer"){
-					document.getElementById("btn1").innerHTML="Figer";
+				if(binary==0){
+					document.getElementById("arret").innerHTML="Continue";
+					binary=1;
+					clearInterval(dessin);
+				}else if(binary==1){
+					document.getElementById("arret").innerHTML="Stop";
+					binary=0;
+					Lancer(sauv);
 				};
 			};
 			function Vider(){
 				candraw.clearRect(0,0,can.width,can.height);
 				xmax = 0;
 				ymax = 0;
+				clearInterval(dessin);
+				document.getElementById("launchcalcul").disabled = false;
+				document.getElementById("launchbutton").disabled = false;
+			};
+			function BigStop(){
+				clearInterval(dessin);
+				document.getElementById("grdarret").disabled = true;
+				document.getElementById("launchcalcul").disabled = false;
+				document.getElementById("launchbutton").disabled = false;
+				document.getElementById("arret").disabled = true;
+				binary = 0;
+				document.getElementById("arret").innerHTML="Stop";
 			};
 		</script>
 	</body>
