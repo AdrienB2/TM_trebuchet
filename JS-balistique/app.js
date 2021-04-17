@@ -6,17 +6,17 @@ var ctx = simulation.getContext("2d");
 
 function drawTrebuchet(ang) {
     
-    var lengthAB = parseFloat(document.getElementById('fronde').value);
-    var lengthBC = parseFloat(document.getElementById('longArm').value);
-    var lengthCD = parseFloat(document.getElementById('shortArm').value);
-    var lengthDE = parseFloat(document.getElementById('weightLenth').value);
-    var height = parseFloat(document.getElementById('pivotHeight').value);
+    var l5 = parseFloat(document.getElementById('fronde').value);
+    var l2 = parseFloat(document.getElementById('longArm').value);
+    var l1 = parseFloat(document.getElementById('shortArm').value);
+    var l4 = parseFloat(document.getElementById('weightLenth').value);
+    var l3 = parseFloat(document.getElementById('pivotHeight').value);
 
-    var c = { x: lengthBC + 200, y: simulation.height - height };
-    var b = { x: c.x - Math.cos(ang * Math.PI / 180) * lengthBC, y: c.y - Math.sin(ang * Math.PI / 180) * lengthBC };
-    var a = { x: b.x, y: b.y + lengthAB };
-    var d = { x: c.x + Math.cos(ang * Math.PI / 180) * lengthCD, y: c.y + Math.sin(ang * Math.PI / 180) * lengthCD };
-    var e = { x: d.x, y: d.y + lengthDE };
+    var c = { x: l2 + 200, y: simulation.height - l3 };
+    var b = { x: c.x - Math.cos(ang * Math.PI / 180) * l2, y: c.y - Math.sin(ang * Math.PI / 180) * l2 };
+    var a = { x: b.x, y: b.y + l5 };
+    var d = { x: c.x + Math.cos(ang * Math.PI / 180) * l1, y: c.y + Math.sin(ang * Math.PI / 180) * l1 };
+    var e = { x: d.x, y: d.y + l4 };
 
     ctx.lineWidth = 2.5;
     ctx.strokeStyle = "#fff";
