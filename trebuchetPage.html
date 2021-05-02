@@ -1,0 +1,75 @@
+<html>
+
+<script src="invert_matrix.js"></script>
+<script src="trebuchetSimulation.js"></script>
+
+
+<body>
+<h2>Test lib simulation</h2>
+
+<script language=javascript>
+paramInit(200,10,30,40,60,5,10); // (m1, m2, l1, l2, l3, l4, l5)
+simulationInit(3.14/4, 3.14/2*3, 3.4/2*3, 0, 0); // (alpha, beta, gamma, v0m1, v0m2)
+startSimulation(0.1,60);
+
+</script>
+
+
+Tableau des positions :<br>
+<table>
+	<tr><td>x</td><td>y</td></tr>
+
+<script>
+ // utilisation des résultats
+ var data=getSimdata();
+ data.forEach(
+  function show(item)
+  {
+	document.write("<tr><td>"+item.x+"</td><td>"+item.y+"</td></tr>")
+  }
+ );
+</script>
+
+</table>
+
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+<div id="chartContainer" style="height: 300px; width: 100%;"></div>
+<script>
+
+var chart = new CanvasJS.Chart("chartContainer", {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "x, y position"
+	},
+	data: [{        
+		type: "line",
+      	indexLabelFontSize: 16,
+		dataPoints: getSimdata()
+	}]
+});
+chart.render();
+
+</script>
+
+<div id="chartContainer2" style="height: 300px; width: 100%;"></div>
+<script>
+
+var chart2 = new CanvasJS.Chart("chartContainer2", {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "y en fonction du temps"
+	},
+	data: [{        
+		type: "line",
+      	indexLabelFontSize: 16,
+		dataPoints: getSimYdata()
+	}]
+});
+chart2.render();
+
+</script>
+</body>
+</html>
