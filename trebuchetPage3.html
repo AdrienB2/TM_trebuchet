@@ -1,0 +1,202 @@
+<html>
+
+<script src="./invert_matrix.js"></script>
+<script src="./trebuchetSimulation3.js"></script>
+
+
+<body>
+<h2>Test lib simulation</h2>
+
+<script language=javascript>
+paramInit(1,100, 6,4,8,1,3);
+simulationInit(-0.2, -0.5, 0.4, 0, 0,0);
+startSimulation(0.001,3000);
+</script>
+
+
+
+
+
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+
+<div id="chartContainer" style="height: 300px; width: 400px;float:right;"></div>
+<script>
+
+var chart = new CanvasJS.Chart("chartContainer", {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "x, y position"
+	},
+	data: [{        
+		type: "line",
+      	indexLabelFontSize: 16,
+		dataPoints: getSimdata()
+	}]
+});
+chart.render();
+
+</script>
+
+<div id="chartContainer2" style="float:right;height: 300px; width: 400px;"></div>
+<script>
+
+var chart2 = new CanvasJS.Chart("chartContainer2", {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "y en fonction du temps"
+	},
+	data: [{        
+		type: "line",
+      	indexLabelFontSize: 16,
+		dataPoints: getSimYdata()
+	}]
+});
+chart2.render();
+
+</script>
+
+<div id="chartContainer3" style="float:right;height: 300px; width: 400px;"></div>
+<script>
+
+var chart3 = new CanvasJS.Chart("chartContainer3", {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "x en fonction du temps"
+	},
+	data: [{        
+		type: "line",
+      	indexLabelFontSize: 16,
+		dataPoints: getSimXdata()
+	}]
+});
+chart3.render();
+
+</script>
+
+
+<div id="chartContainer4" style="float:right;height: 300px; width: 400px;"></div>
+<script>
+
+var chart4 = new CanvasJS.Chart("chartContainer4", {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "alpha en fonction du temps"
+	},
+	data: [{        
+		type: "line",
+      	indexLabelFontSize: 16,
+		dataPoints: getSimAngleAdata()
+	}]
+});
+chart4.render();
+
+</script>
+
+<div id="chartContainer5" style="float:right;height: 300px; width: 400px;"></div>
+<script>
+
+var chart5 = new CanvasJS.Chart("chartContainer5", {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "x2 et y2 en fonction du temps"
+	},
+	data: [{        
+		type: "line",
+      	indexLabelFontSize: 16,
+		dataPoints: getSimP2data()
+	}]
+});
+chart5.render();
+
+</script>
+
+<div id="chartContainer6" style="float:right;height: 300px; width: 400px;"></div>
+<script>
+
+var chart6 = new CanvasJS.Chart("chartContainer6", {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "x3 et y3 en fonction du temps"
+	},
+	data: [{        
+		type: "line",
+      	indexLabelFontSize: 16,
+		dataPoints: getSimP3data()
+	}]
+});
+chart6.render();
+
+var chart5 = new CanvasJS.Chart("chartContainer5", {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "x2 et y2 en fonction du temps"
+	},
+	data: [{        
+		type: "line",
+      	indexLabelFontSize: 16,
+		dataPoints: getSimP2data()
+	}]
+});
+chart5.render();
+
+</script>
+
+<div id="chartContainer6" style="float:right;height: 300px; width: 400px;"></div>
+<script>
+
+var chart6 = new CanvasJS.Chart("chartContainer6", {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "x3 et y3 en fonction du temps"
+	},
+	data: [{        
+		type: "line",
+      	indexLabelFontSize: 16,
+		dataPoints: getSimP3data()
+	}]
+});
+chart6.render();
+var chart5 = new CanvasJS.Chart("chartContainer5", {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "x2 et y2 en fonction du temps"
+	},
+	data: [{        
+		type: "line",
+      	indexLabelFontSize: 16,
+		dataPoints: getSimP2data()
+	}]
+});
+chart5.render();
+
+</script>
+
+<div id="chartContainer6" style="float:right;height: 300px; width: 400px;"></div>
+<script>
+
+var chart7 = new CanvasJS.Chart("chartContainer7", {
+	animationEnabled: true,
+	theme: "light2",
+	title:{
+		text: "x4 et y4 en fonction du temps"
+	},
+	data: [{        
+		type: "line",
+      	indexLabelFontSize: 16,
+		dataPoints: getSimP3data()
+	}]
+});
+chart7.render();
+</script>
+
+</body>
+</html>
