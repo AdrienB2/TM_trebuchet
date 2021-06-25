@@ -132,6 +132,8 @@ function startSim() {
 function startSimulation(dt, maxAng) {
     var t = 0;
     var i = 0;
+    positions = []
+    angles = []
     while (beta-alpha < maxAng) {
         simulationStep(t,dt,i);
         t += dt;
