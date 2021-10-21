@@ -230,6 +230,7 @@ function matrix_invert(M) {
     //matrix I should be the inverse:
     return I;
 }
+
 // 0.4. calculs des accélérations angulaires:
 function calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma) {
     // ----- Calcul des coefficient de la matrice T -------
