@@ -1,0 +1,194 @@
+* {
+    font-family: 'Trebuchet MS';
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html{
+    height: 100%;
+    overflow-y: hidden;
+}
+a{
+    color: royalblue;
+}
+.menu {
+    display: flex;
+    flex-direction: column;
+    width: 15%;
+    min-height: 100%;
+    padding: 1em;
+    border-right: 1px solid black;
+    font-size: .8vw;
+    overflow-x: visible;
+    overflow-y:scroll;
+}
+.menuLabel{
+    display: block;
+    width: 100%;
+    padding-top: 1em;
+    padding-bottom: 0.5em;
+}
+.menuInput{
+    width:  100%;
+    border-radius: .25em;
+    border: 1px solid black;
+    padding: 0.3em;
+}
+.btn{
+    background-color: #aaaaaa; 
+    border: none;
+    color: black;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 0.5vw;
+    padding: 0.5vw;
+    width: 100%;
+    font-size: .8vw;
+    border-radius: 0.5vh;
+}
+[data-tab-content]{
+    display: none; 
+    height: 95vh;
+}
+.active[data-tab-content]{
+    display: flex;
+    flex-direction: row;
+    height: 95vh;
+}
+.tabs{
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    list-style-type: none;
+    border-bottom: 1px solid black;
+    height: 5vh;
+}
+.tab{
+    cursor: pointer;
+    height: 100%;
+    line-height: 5vh;
+    padding-left: 2.5vh;
+    padding-right: 2.5vh;
+}
+.tab.active{
+    background-color: #ccc;
+}
+.tab:hover{
+    font-weight: 900;
+}
+.tab.active:hover{
+    font-weight: normal;
+}
+#graphTab, #aboutTab{
+    flex-direction: column;
+    padding: 1vh;
+    overflow-y: scroll;
+}
+.chartContainer{
+    display: flex;
+    flex-direction: column;
+}
+.chart{
+    padding-top: 5vh;
+    width: 40%;
+}
+.chartTitle{
+    font-size: larger;
+    font-weight: bold;
+    padding-bottom: 1.5vh;
+}
+.chartRow{
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+.dataContainer{
+    display: flex;
+    font-family: 'Trebuchet MS';
+    height: 4%;
+    font-size: 1.7vh;
+    align-items: center;
+    justify-content: space-around;
+}
+.dataLabel{
+    width: 10%;
+}
+@media only screen and (max-width: 1250px) {
+  .chartRow{
+      flex-direction: column;
+  }
+  .chart{
+      width: 100%;
+      padding-inline: 10%;
+  }
+}
+
+.switch {
+  position: relative;
+  display: flex;
+  height: 50%;
+  aspect-ratio: 1.76;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  -webkit-transition: .4s;
+  transition: .4s;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 80%;
+  aspect-ratio: 1;
+  left: 10%;
+  bottom: 10%;
+  background-color: white;
+  -webkit-transition: .4s;
+  transition: .4s;
+  z-index: 20;
+}
+
+input:checked + .slider {
+  background-color: #2196F3;
+}
+
+input:focus + .slider {
+  box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked + .slider:before {
+  -webkit-transform: translateX(80%);
+  -ms-transform: translateX(80%);
+  transform: translateX(80%);
+}
+
+.slider.round {
+  border-radius: 50vh;
+}
+
+.slider.round:before {
+  border-radius: 50%;
+}
+.switch-icon{
+    height: 60%;
+    z-index: 10;
+    position: relative;
+    top: 20%;
+}
+.switch-icon-2{
+    left: 12%;
+}
