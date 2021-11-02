@@ -25,7 +25,7 @@ var colors = {}
 const darkModeSwitch = document.getElementById("darkModeSwitch")
 
 function switchColorMode(switch2Dark) {
-    //définition des couleurs en fonction du mode sombre/claire
+    //définition des couleurs en fonction du mode sombre/clair
     colors = {
         background: switch2Dark ? "#121212" : "#fff",
         background2: switch2Dark ? "#474747" : "#ccc",
@@ -61,7 +61,7 @@ function switchColorMode(switch2Dark) {
     document.getElementById("tabs").style.borderBottom = `1px solid ${colors.textColor}`
     document.getElementById("menu").style.borderRight = `1px solid ${colors.textColor}`
 
-    //changement de la couleurs des élément du menu
+    //changement de la couleurs des éléments du menu
     for (let index = 0; index < document.querySelectorAll(".menuInput").length; index++) {
         const element = document.querySelectorAll(".menuInput")[index].style;
         element.border = `1px solid ${colors.textColor}`
