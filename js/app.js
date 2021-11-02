@@ -1,6 +1,6 @@
-//======VARIABLES ET CONSTANTES======//
+//====== VARIABLES ET CONSTANTES ======//
 
-//Canvas
+//canvas
 const simulation = document.getElementById("simulation");
 simulation.width = window.innerWidth * 0.85;
 simulation.height = window.innerHeight * 0.9;
@@ -13,26 +13,27 @@ const e_mb = document.getElementById("mb");
 const e_l1 = document.getElementById("shortArm");
 const e_l2 = document.getElementById("longArm");
 const e_l3 = document.getElementById("pivotHeight");
-const e_l4 = document.getElementById("weightLenth");
+const e_l4 = document.getElementById("weightLength");
 const e_l5 = document.getElementById("fronde");
 const e_ral = document.getElementById("ralenti");
 
 //constantes
 const PI = Math.PI;
 const simDT = 0.01; //dt en sec
-const g = 9.81;
+const t_max = 100; // Temps maximal en seconde que la simulation peut durer (But: éviter un temps de calcul trop long)
+const g = 9.81; //Accélération gravitationnelle 
 const coefTrainee = 0.5;
-const massV_weightLenth = 2500; //masse volumique d'une pierre dite "dure"
+const massV_contrepoids = 2500; //masse volumique d'une pierre dite "dure"
 const massV_ball = 2500; //masse volumique d'une pierre dite "dure"
 const massV_bois = 970; //masse volumique du sorbier domestique (bois rigide utilisé dans la fabrication de la verge du trébuchet)
-const masseVolFluide = 1.225; //masse volumique du fluide dans lequel la simulation évolue (air)
+const masseVolFluide = 0; //masse volumique du fluide dans lequel la simulation évolue (air)
 const masseFronde = 0.1; //masse de la fronde;
-const rendementCollision = 0.25; //rendement des collisions BOIS (énergiecollision_initiale*rendementCollision = énergiecollision_finale)
+const coefRestitution = 0.5; //coefficient de restitution de la vitesse après collision du BOIS
 
 
 //variables de simulation
-//considérées comme constantes:
-//dimentions du trébuchet
+//considérées comme constantes dans le temps
+//dimensions du trébuchet
 var m1;
 var m2;
 var mb;
@@ -44,25 +45,28 @@ var l5;
 var lb;
 
 var releaseAngle; //angle de libération
-
 var w; //rotation du boulet
 
 //vitesse et inclinaison du vent
 var vvent;
 var ivent;
 
-var methode;//méthode de résolution
+//méthode de résolution
+var methode; 
 
-//pas constantes:
+//variables pas constantes dans le temps
 var i_release;
 var i_continue;
 var t; //temps
 var i; //itération (pas)
 
+//angles
 var alpha;
 var gamma;
 var beta;
-var d1alpha;
+
+//vitesses angulaires
+var d1alpha; 
 var d1gamma;
 var d1beta;
 
@@ -71,9 +75,9 @@ var xmax = 0;
 var ymax = 0;
 var scale; //coefficient permettant l'affichage correct de la simulation dans la fenêtre
 var currentScale; //coefficient actuel (change en fonction du temps pour permettre le focus sur le trébuchet)
-var Rmax; //portée 
+var R; //portée théorique
 
-//listes:
+//listes
 var angles = new Array();
 var d1angles = new Array();
 var d2angles = new Array();
@@ -81,26 +85,27 @@ var positionsx = new Array();
 var positionsy = new Array();
 var vitesses = new Array();
 var inclinaisons = new Array();
-var ETreb = new Array(); //Energie uniquement sur le trébuchet
-var Energies = new Array(); //Energie totale
+var ETreb = new Array(); //énergie du trébuchet uniquement
+var Energies = new Array(); //énergie totale
 var animPoints = new Array(); //variable qui stocke les points à tracer pour les trajectoires.
 
 var sauv; //sauvegarde du pas
 var ral; //coefficient de ralenti
 
 
-//booléen:
-var Pause; //Indique si la simulation est en pause ou non.
-var Ralenti; //Indique si la simulation est ralentie ou non.
-var Erreur; //Indique si la Simulation est en erreur;
-var SimulationStatus; //Indique si la simulation est lancée ou non.
-var focusMode = false;
+//booléens
+var Pause; //indique si la simulation est en pause ou non
+var Ralenti; //indique si la simulation est ralentie ou non
+var Erreur; //indique si la simulation est en erreur
+var SimulationStatus; //indique si la simulation est lancée ou non
+var focusMode = false; //par défaut, on voit toute la trajectoire
 
-var animInterval; //boucle qui affiche l'annimation
+var animInterval; //boucle qui affiche l'animation
 
 
-//====== 0. PETITES ET MOYENNES FONCTIONS======//
-// 0.1. fonction pour calculer le max et le min d'une liste (la fonction par défaut ne marchant pas toujours)
+//====== 0. PETITES ET MOYENNES FONCTIONS ======//
+
+//0.1. fonction pour calcule le maximum et le minimum d'une liste
 function miax(liste) {
     let min = liste[0],
         max = liste[0];
@@ -114,7 +119,7 @@ function miax(liste) {
     return [max, min];
 }
 
-// 0.2. fonction qui donne l'inclinaison
+//0.2. fonction qui donne l'inclinaison
 function inc(vx, vy) {
     if (vx >= 0) {
         return (Math.atan(vy / vx) / PI) * 180;
@@ -123,9 +128,9 @@ function inc(vx, vy) {
     }
 }
 
-// 0.3. Invertion de matrices
+// 0.3. inversion de matrice (trouvé sur Internet)
 function matrix_invert(M) {
-    // I use guassian Elimination to calculate the inverse:
+    // I use gaussian Elimination to calculate the inverse:
     // (1) 'augment' the matrix (left) by the identity (on the right)
     // (2) Turn the matrix on the left into the identity by elemetry row ops
     // (3) The matrix on the right is the inverse (was the identity matrix)
@@ -231,9 +236,8 @@ function matrix_invert(M) {
     return I;
 }
 
-// 0.4. calculs des accélérations angulaires:
+//0.4. calculs des accélérations angulaires
 function calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma) {
-    // ----- Calcul des coefficient de la matrice T -------
 
     // l1 = longueur du bras droit (bras court), l2 = longueur du bras gauche (bras long),
     // l3 = hauteur du pivot, l4 = longueur du contrepoids, l5 = longueur de la fronde
@@ -242,36 +246,16 @@ function calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma) {
     // gamma = angle bras droit (l1)-axe contre-poids (l4)
     // m1 = poids à lancer, m2 = contre-poids, mb = masse de la barre
 
-    var c11 =
-        m1 * (l1 ** 2 + l4 ** 2) +
-        mb * lb ** 2 -
-        2 * m1 * l1 * l4 * Math.cos(gamma) +
-        m2 * (l2 ** 2 + l5 ** 2) -
-        2 * m2 * l2 * l5 * Math.cos(beta);
+    var c11 = m1 * (l1 ** 2 + l4 ** 2) + mb * lb ** 2 - 2 * m1 * l1 * l4 * Math.cos(gamma) + m2 * (l2 ** 2 + l5 ** 2) - 2 * m2 * l2 * l5 * Math.cos(beta);
     
     var c12 = m2 * (-(l5 ** 2) + l2 * l5 * Math.cos(beta));
 
     var c13 = m1 * (l4 ** 2 - l1 * l4 * Math.cos(gamma));
 
-    var w1 =
-        g *
-        (((-m1 * (massV_weightLenth - masseVolFluide)) / massV_weightLenth) * l1 +
-            ((m2 * (massV_ball - masseVolFluide)) / massV_ball) * l2 +
-            ((mb * (massV_bois - masseVolFluide)) / massV_bois) * lb) *
-        Math.sin(alpha) +
-        ((g * (massV_ball - masseVolFluide)) / massV_ball) *
-        m2 *
-        l5 *
-        Math.sin(beta - alpha) +
-        ((g * (massV_weightLenth - masseVolFluide)) / massV_weightLenth) *
-        m1 *
-        l4 *
-        Math.sin(gamma + alpha) -
-        d1alpha *
-        (2 * m1 * l1 * l4 * d1gamma * Math.sin(gamma) +
-            2 * m2 * l2 * l5 * d1beta * Math.sin(beta)) -
-        m1 * l1 * l4 * Math.sin(gamma) * d1gamma ** 2 +
-        m2 * l2 * l5 * Math.sin(beta) * d1beta ** 2;
+    var w1 = g * (-m1*l1 + m2 * l2 + mb * lb) * Math.sin(alpha) + g * m2 * l5 * Math.sin(beta - alpha) +
+        g * m1 * l4 * Math.sin(gamma + alpha) 
+        - d1alpha * (2 * m1 * l1 * l4 * d1gamma * Math.sin(gamma) + 2 * m2 * l2 * l5 * d1beta * Math.sin(beta)) -
+        m1 * l1 * l4 * Math.sin(gamma) * d1gamma ** 2 + m2 * l2 * l5 * Math.sin(beta) * d1beta ** 2;
     
     var c21 = m2 * (-(l5 ** 2) + l2 * l5 * Math.cos(beta));
 
@@ -279,12 +263,7 @@ function calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma) {
 
     var c23 = 0;
 
-    var w2 =
-        m2 * l2 * l5 * Math.sin(beta) * d1alpha ** 2 -
-        ((g * (massV_ball - masseVolFluide)) / massV_ball) *
-        m2 *
-        l5 *
-        Math.sin(beta - alpha);
+    var w2 = m2 * l2 * l5 * Math.sin(beta) * d1alpha ** 2 - g * m2 * l5 * Math.sin(beta - alpha);
     
     var c31 = m1 * (l4 ** 2 - l1 * l4 * Math.cos(gamma));
 
@@ -292,12 +271,7 @@ function calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma) {
 
     var c33 = m1 * l4 ** 2;
 
-    var w3 =
-        m1 * l1 * l4 * Math.sin(gamma) * d1alpha ** 2 +
-        ((g * (massV_weightLenth - masseVolFluide)) / massV_weightLenth) *
-        m1 *
-        l4 *
-        Math.sin(gamma + alpha);
+    var w3 = m1 * l1 * l4 * Math.sin(gamma) * d1alpha ** 2 + g * m1 * l4 * Math.sin(gamma + alpha);
 
     // ------ inverse de la matrice T ------- //
     T = [
@@ -319,94 +293,49 @@ function calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma) {
     };
 }
 
-//====== 1. Fonctions pour les calculs(utilisées dans la fonction "calculate")======//
-//1.1. Méthodes d'intégration pour l'intégration numérique pour les angles
-//1.1.1. Méthode d'Euler
+//====== 1. FONCTIONS POUR LES CALCULS (utilisées dans la fonction "calculate") ======//
+//1.1. méthodes d'intégration numérique pour les angles du trébuchet
+//1.1.1. méthode d'Euler
 function EulerMethod(dt, presenceBalle) {
     // ----- calcul des nouvelles vitesse et positions avec méthode Euler, approximation du second ordre : x = x0 + dx/dt * dt + 1/2 * d^2x/dt^2 * dt^2 ----- //
     let p = calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma);
     d2alpha = p.a;
     d2beta = p.b;
     d2gamma = p.c;
-    alpha += dt * d1alpha + 0.5 * Math.pow(dt, 2) * d2alpha;
-    beta += dt * d1beta + 0.5 * Math.pow(dt, 2) * d2beta;
-    gamma += dt * d1gamma + 0.5 * Math.pow(dt, 2) * d2gamma;
-    if (beta >= 2 * PI || beta <= 0.01 || gamma >= 2 * PI || gamma <= 0.01) {
-        alpha -= dt * d1alpha + 0.5 * dt ** 2 * d2alpha;
-        if (beta >= 2 * PI || beta <= 0.01) {
-            beta -= dt * d1beta + 0.5 * dt ** 2 * d2beta;
-            d1beta *= -(rendementCollision ** 0.5);
-        } else {
-            beta -= dt * d1beta + 0.5 * dt ** 2 * d2beta;
-        }
-        if (gamma >= 2 * PI || gamma <= 0.01) {
-            gamma -= dt * d1gamma + 0.5 * dt ** 2 * d2gamma;
-            d1gamma *= -(rendementCollision ** 0.5);
-        } else {
-            gamma -= dt * d1gamma + 0.5 * dt ** 2 * d2gamma;
-        }
+    //vitesses angulaires de beta et gamma après les collisions
+    if(beta+dt*d1beta+0.5*dt**2*d2beta>=2*PI||beta+dt*d1beta+0.5*dt**2*d2beta<=0.01||gamma+dt*d1gamma+0.5*dt**2*d2gamma>=2*PI||gamma+dt*d1gamma+0.5*dt**2*d2gamma<=0.01){
+        if(beta+dt*d1beta+0.5*dt**2*d2beta>=2*PI||beta+dt*d1beta+0.5*dt**2*d2beta<=0.01){
+        d1beta *= -coefRestitution;
+        };
+        if(gamma+dt*d1gamma+0.5*dt**2*d2gamma>=2*PI||gamma+dt*d1gamma+0.5*dt**2*d2gamma<=0.01){
+        d1gamma *= -coefRestitution;
+        };
         p = calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma);
         d2alpha = p.a;
         d2beta = p.b;
         d2gamma = p.c;
-        alpha += dt * d1alpha + 0.5 * Math.pow(dt, 2) * d2alpha;
-        beta += dt * d1beta + 0.5 * Math.pow(dt, 2) * d2beta;
-        gamma += dt * d1gamma + 0.5 * Math.pow(dt, 2) * d2gamma;
-    }
+    };
+    alpha += dt * d1alpha + 0.5 * Math.pow(dt, 2) * d2alpha;
+    beta += dt * d1beta + 0.5 * Math.pow(dt, 2) * d2beta;
+    gamma += dt * d1gamma + 0.5 * Math.pow(dt, 2) * d2gamma;
     d1alpha += dt * d2alpha;
     d1beta += dt * d2beta;
     d1gamma += dt * d2gamma;
 
     //Ajout dans les listes
-    angles.push({
-        a: alpha,
-        b: beta,
-        c: gamma,
-    });
-    d1angles.push({
-        a: d1alpha,
-        b: d1beta,
-        c: d1gamma,
-    });
-    d2angles.push({
-        a: d2alpha,
-        b: d2beta,
-        c: d2gamma,
-    });
+    angles.push({a: alpha, b: beta, c: gamma});
+    d1angles.push({a: d1alpha, b: d1beta, c: d1gamma});
+    d2angles.push({a: d2alpha, b: d2beta, c: d2gamma});
 
-    let E =
-        (1 / 2) *
-        (m1 * (l1 ** 2 + l4 ** 2) +
-            mb * lb ** 2 -
-            2 * m1 * l1 * l4 * Math.cos(gamma) +
-            m2 * (l2 ** 2 + l5 ** 2) -
-            2 * m2 * l2 * l5 * Math.cos(beta)) *
-        d1alpha ** 2 +
-        (1 / 2) * m1 * l4 ** 2 * d1gamma ** 2 +
-        (1 / 2) * m2 * l5 ** 2 * d1beta ** 2 +
-        m1 * (l4 ** 2 - l1 * l4 * Math.cos(gamma)) * d1alpha * d1gamma +
-        m2 * (-(l5 ** 2) + l2 * l5 * Math.cos(beta)) * d1alpha * d1beta +
-        g *
-        ((m1 * (massV_weightLenth - masseVolFluide)) / massV_weightLenth +
-            (m2 * (massV_ball - masseVolFluide)) / massV_ball +
-            (mb * (massV_bois - masseVolFluide)) / massV_bois) *
-        l3 +
-        g *
-        (((-m1 * (massV_weightLenth - masseVolFluide)) / massV_weightLenth) * l1 +
-            ((m2 * (massV_ball - masseVolFluide)) / massV_ball) * l2 +
-            ((mb * (massV_bois - masseVolFluide)) / massV_bois) * lb) *
-        Math.cos(alpha) -
-        ((g * (massV_ball - masseVolFluide)) / massV_ball) *
-        m2 *
-        l5 *
-        Math.cos(beta - alpha) +
-        ((g * (massV_weightLenth - masseVolFluide)) / massV_weightLenth) *
-        m1 *
-        l4 *
-        Math.cos(gamma + alpha);
+    //énergie avec la méthode d'Euler
+    let E = (1 / 2) * (m1 * (l1 ** 2 + l4 ** 2) + mb * lb ** 2 - 2 * m1 * l1 * l4 * Math.cos(gamma) + m2 * (l2 ** 2 + l5 ** 2) - 2 * m2 * l2 * l5 * Math.cos(beta)) * d1alpha ** 2 +
+        (1 / 2) * m1 * l4 ** 2 * d1gamma ** 2 + (1 / 2) * m2 * l5 ** 2 * d1beta ** 2 + m1 * (l4 ** 2 - l1 * l4 * Math.cos(gamma)) * d1alpha * d1gamma +
+        m2 * (-(l5 ** 2) + l2 * l5 * Math.cos(beta)) * d1alpha * d1beta + g *(-m1 * l1 + m2 * l2 + mb * lb) * Math.cos(alpha) - g * m2 * l5 * Math.cos(beta - alpha) +
+        g * m1 * l4 * Math.cos(gamma + alpha) + g*(m1+m2+mb)*l3;
     
     ETreb.push(E);
 
+    //position et vitesse de la balle
     if (presenceBalle == true) {
         if (l2 + l5 + r2 > l1 + l4 + r1) {
             var x = l2 + l5 + r2 - l2 * Math.sin(alpha) - l5 * Math.sin(beta - alpha);
@@ -436,7 +365,7 @@ function EulerMethod(dt, presenceBalle) {
         );
     }
 }
-//1.1.2. Méthode d'Heun
+//1.1.2. méthode de Heun
 function Heun(dt, presenceBalle) {
     let p = calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma);
     let q = calculsAccAngu(
@@ -447,30 +376,16 @@ function Heun(dt, presenceBalle) {
         d1beta + p.b * dt,
         d1gamma + p.c * dt
     );
-
     d2alpha = (p.a + q.a) / 2;
     d2beta = (p.b + q.b) / 2;
     d2gamma = (p.c + q.c) / 2;
-
-    alpha += dt * d1alpha + 0.5 * Math.pow(dt, 2) * d2alpha;
-    beta += dt * d1beta + 0.5 * Math.pow(dt, 2) * d2beta;
-    gamma += dt * d1gamma + 0.5 * Math.pow(dt, 2) * d2gamma;
-
-    if (beta >= 2 * PI || beta <= 0.01 || gamma >= 2 * PI || gamma <= 0.01) {
-        alpha -= dt * d1alpha + 0.5 * dt ** 2 * d2alpha;
-        if (beta >= 2 * PI || beta <= 0.01) {
-            beta -= dt * d1beta + 0.5 * dt ** 2 * d2beta;
-            d1beta *= -(rendementCollision ** 0.5);
-        } else {
-            beta -= dt * d1beta + 0.5 * dt ** 2 * d2beta;
-        }
-        if (gamma >= 2 * PI || gamma <= 0.01) {
-            gamma -= dt * d1gamma + 0.5 * dt ** 2 * d2gamma;
-            d1gamma *= -(rendementCollision ** 0.5);
-        } else {
-            gamma -= dt * d1gamma + 0.5 * dt ** 2 * d2gamma;
-        }
-
+    if(beta+dt*d1beta+0.5*dt**2*d2beta>=2*PI||beta+dt*d1beta+0.5*dt**2*d2beta<=0.01||gamma+dt*d1gamma+0.5*dt**2*d2gamma>=2*PI||gamma+dt*d1gamma+0.5*dt**2*d2gamma<=0.01){
+        if(beta+dt*d1beta+0.5*dt**2*d2beta>=2*PI||beta+dt*d1beta+0.5*dt**2*d2beta<=0.01){
+        d1beta *= -coefRestitution;
+        };
+        if(gamma+dt*d1gamma+0.5*dt**2*d2gamma>=2*PI||gamma+dt*d1gamma+0.5*dt**2*d2gamma<=0.01){
+        d1gamma *= -coefRestitution;
+        };
         p = calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma);
         q = calculsAccAngu(
             alpha + d1alpha * dt + (1 / 2) * p.a * dt ** 2,
@@ -480,67 +395,26 @@ function Heun(dt, presenceBalle) {
             d1beta + p.b * dt,
             d1gamma + p.c * dt
         );
-
         d2alpha = (p.a + q.a) / 2;
         d2beta = (p.b + q.b) / 2;
         d2gamma = (p.c + q.c) / 2;
-
-        alpha += dt * d1alpha + 0.5 * Math.pow(dt, 2) * d2alpha;
-        beta += dt * d1beta + 0.5 * Math.pow(dt, 2) * d2beta;
-        gamma += dt * d1gamma + 0.5 * Math.pow(dt, 2) * d2gamma;
-    }
-
+    };
+    alpha += dt * d1alpha + 0.5 * Math.pow(dt, 2) * d2alpha;
+    beta += dt * d1beta + 0.5 * Math.pow(dt, 2) * d2beta;
+    gamma += dt * d1gamma + 0.5 * Math.pow(dt, 2) * d2gamma;
     d1alpha += dt * d2alpha;
     d1beta += dt * d2beta;
     d1gamma += dt * d2gamma;
 
     //Ajout dans les listes
-    angles.push({
-        a: alpha,
-        b: beta,
-        c: gamma,
-    });
-    d1angles.push({
-        a: d1alpha,
-        b: d1beta,
-        c: d1gamma,
-    });
-    d2angles.push({
-        a: d2alpha,
-        b: d2beta,
-        c: d2gamma,
-    });
+    angles.push({a: alpha, b: beta, c: gamma});
+    d1angles.push({a: d1alpha, b: d1beta, c: d1gamma});
+    d2angles.push({a: d2alpha, b: d2beta, c: d2gamma});
 
-    let E =
-        (1 / 2) *
-        (m1 * (l1 ** 2 + l4 ** 2) +
-            mb * lb ** 2 -
-            2 * m1 * l1 * l4 * Math.cos(gamma) +
-            m2 * (l2 ** 2 + l5 ** 2) -
-            2 * m2 * l2 * l5 * Math.cos(beta)) *
-        d1alpha ** 2 +
-        (1 / 2) * m1 * l4 ** 2 * d1gamma ** 2 +
-        (1 / 2) * m2 * l5 ** 2 * d1beta ** 2 +
-        m1 * (l4 ** 2 - l1 * l4 * Math.cos(gamma)) * d1alpha * d1gamma +
-        m2 * (-(l5 ** 2) + l2 * l5 * Math.cos(beta)) * d1alpha * d1beta +
-        g *
-        ((m1 * (massV_weightLenth - masseVolFluide)) / massV_weightLenth +
-            (m2 * (massV_ball - masseVolFluide)) / massV_ball +
-            (mb * (massV_bois - masseVolFluide)) / massV_bois) *
-        l3 +
-        g *
-        (((-m1 * (massV_weightLenth - masseVolFluide)) / massV_weightLenth) * l1 +
-            ((m2 * (massV_ball - masseVolFluide)) / massV_ball) * l2 +
-            ((mb * (massV_bois - masseVolFluide)) / massV_bois) * lb) *
-        Math.cos(alpha) -
-        ((g * (massV_ball - masseVolFluide)) / massV_ball) *
-        m2 *
-        l5 *
-        Math.cos(beta - alpha) +
-        ((g * (massV_weightLenth - masseVolFluide)) / massV_weightLenth) *
-        m1 *
-        l4 *
-        Math.cos(gamma + alpha);
+    let E = (1 / 2) * (m1 * (l1 ** 2 + l4 ** 2) + mb * lb ** 2 - 2 * m1 * l1 * l4 * Math.cos(gamma) + m2 * (l2 ** 2 + l5 ** 2) - 2 * m2 * l2 * l5 * Math.cos(beta)) * d1alpha ** 2 +
+        (1 / 2) * m1 * l4 ** 2 * d1gamma ** 2 + (1 / 2) * m2 * l5 ** 2 * d1beta ** 2 + m1 * (l4 ** 2 - l1 * l4 * Math.cos(gamma)) * d1alpha * d1gamma +
+        m2 * (-(l5 ** 2) + l2 * l5 * Math.cos(beta)) * d1alpha * d1beta + g *(-m1 * l1 + m2 * l2 + mb * lb) * Math.cos(alpha) - g * m2 * l5 * Math.cos(beta - alpha) +
+        g * m1 * l4 * Math.cos(gamma + alpha) + g*(m1+m2+mb)*l3;
     
     ETreb.push(E);
 
@@ -555,113 +429,41 @@ function Heun(dt, presenceBalle) {
         positionsx.push(x);
         positionsy.push(y);
 
-        vitesses.push(
-            (l2 ** 2 * d1alpha ** 2 +
-                l5 ** 2 * (d1beta - d1alpha) ** 2 +
-                2 * l2 * l5 * d1alpha * (d1beta - d1alpha) * Math.cos(beta)) **
-            0.5
-        );
-        inclinaisons.push(
-            inc(
-                -l2 * d1alpha * Math.cos(alpha) -
-                l5 * (d1beta - d1alpha) * Math.cos(beta - alpha),
-                -l2 * d1alpha * Math.sin(alpha) +
-                l5 * (d1beta - d1alpha) * Math.sin(beta - alpha)
-            )
-        );
+        vitesses.push((l2 ** 2 * d1alpha ** 2 + l5 ** 2 * (d1beta - d1alpha) ** 2 + 2 * l2 * l5 * d1alpha * (d1beta - d1alpha) * Math.cos(beta)) ** 0.5);
+        inclinaisons.push(inc( -l2 * d1alpha * Math.cos(alpha) - l5 * (d1beta - d1alpha) * Math.cos(beta - alpha), -l2 * d1alpha * Math.sin(alpha) + l5 * (d1beta - d1alpha) * Math.sin(beta - alpha)));
     }
 }
-//1.1.3. Méthode de Runge-Kutta (RK4)
+//1.1.3. méthode de Runge-Kutta (RK4)
 function RungeKutta(dt, presenceBalle) {
     let p = calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma);
-    let q = calculsAccAngu(
-        alpha + (d1alpha * dt) / 2,
-        beta + (d1beta * dt) / 2,
-        gamma + (d1gamma * dt) / 2,
-        d1alpha + (p.a * dt) / 2,
-        d1beta + (p.b * dt) / 2,
-        d1gamma + (p.c * dt) / 2
-    );
-    let r = calculsAccAngu(
-        alpha + (d1alpha * dt) / 2 + (1 / 2) * p.a * (dt / 2) ** 2,
-        beta + (d1beta * dt) / 2 + (1 / 2) * p.b * (dt / 2) ** 2,
-        gamma + (d1gamma * dt) / 2 + (1 / 2) * p.c * (dt / 2) ** 2,
-        d1alpha + (q.a * dt) / 2,
-        d1beta + (q.b * dt) / 2,
-        d1gamma + (q.c * dt) / 2
-    );
-    let s = calculsAccAngu(
-        alpha + d1alpha * dt + (1 / 2) * q.a * dt ** 2,
-        beta + d1beta * dt + (1 / 2) * q.b * dt ** 2,
-        gamma + d1gamma * dt + (1 / 2) * q.c * dt ** 2,
-        d1alpha + r.a * dt,
-        d1beta + r.b * dt,
-        d1gamma + r.c * dt
-    );
-
-    d2alpha = (p.a + q.a + r.a) / 3;
-    d2beta = (p.b + q.b + r.b) / 3;
-    d2gamma = (p.c + q.c + r.c) / 3;
-
-    alpha += dt * d1alpha + 0.5 * dt ** 2 * ((p.a + q.a + r.a) / 3);
-    beta += dt * d1beta + 0.5 * dt ** 2 * ((p.b + q.b + r.b) / 3);
-    gamma += dt * d1gamma + 0.5 * dt ** 2 * ((p.c + q.c + r.c) / 3);
-    
+    let q = calculsAccAngu(alpha+d1alpha*dt/2,beta+d1beta*dt/2,gamma+d1gamma*dt/2,d1alpha+p.a*dt/2,d1beta+p.b*dt/2,d1gamma+p.c*dt/2);
+    let r = calculsAccAngu(alpha+d1alpha*dt/2+1/2*p.a*(dt/2)**2,beta+d1beta*dt/2+1/2*p.b*(dt/2)**2,gamma+d1gamma*dt/2+1/2*p.c*(dt/2)**2, d1alpha+q.a*dt/2,d1beta+q.b*dt/2,d1gamma+q.c*dt/2);
+    let s = calculsAccAngu(alpha+d1alpha*dt+1/2*q.a*(dt)**2,beta+d1beta*dt+1/2*q.b*(dt)**2,gamma+d1gamma*dt+1/2*q.c*(dt)**2, d1alpha+r.a*dt,d1beta+r.b*dt,d1gamma+r.c*dt);
+    d2alpha = (p.a+q.a+r.a)/3;
+    d2beta = (p.b+q.b+r.b)/3;
+    d2gamma = (p.c+q.c+r.c)/3;
     // Si beta ou gamma est en dehors de l'intervalle ]0.01,2*PI[, on inverse et diminue (par 2) les vitesses angulaires à chaque collision;
-    if (beta >= 2 * PI || beta <= 0.01 || gamma >= 2 * PI || gamma <= 0.01) {
-        alpha -= dt * d1alpha + 0.5 * dt ** 2 * ((p.a + q.a + r.a) / 3);
-        if (beta >= 2 * PI || beta <= 0.01) {
-            beta -= dt * d1beta + 0.5 * dt ** 2 * ((p.b + q.b + r.b) / 3);
-            d1beta *= -(rendementCollision ** 0.5);
-        } else {
-            beta -= dt * d1beta + 0.5 * dt ** 2 * ((p.b + q.b + r.b) / 3);
-        }
-        if (gamma >= 2 * PI || gamma <= 0.01) {
-            gamma -= dt * d1gamma + 0.5 * dt ** 2 * ((p.c + q.c + r.c) / 3);
-            d1gamma *= -(rendementCollision ** 0.5);
-        } else {
-            gamma -= dt * d1gamma + 0.5 * dt ** 2 * ((p.c + q.c + r.c) / 3);
-        }
-        
-        p = calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma);
-        q = calculsAccAngu(
-            alpha + (d1alpha * dt) / 2,
-            beta + (d1beta * dt) / 2,
-            gamma + (d1gamma * dt) / 2,
-            d1alpha + (p.a * dt) / 2,
-            d1beta + (p.b * dt) / 2,
-            d1gamma + (p.c * dt) / 2
-        );
-
-        r = calculsAccAngu(
-            alpha + (d1alpha * dt) / 2 + (1 / 2) * p.a * (dt / 2) ** 2,
-            beta + (d1beta * dt) / 2 + (1 / 2) * p.b * (dt / 2) ** 2,
-            gamma + (d1gamma * dt) / 2 + (1 / 2) * p.c * (dt / 2) ** 2,
-            d1alpha + (q.a * dt) / 2,
-            d1beta + (q.b * dt) / 2,
-            d1gamma + (q.c * dt) / 2
-        );
-
-        s = calculsAccAngu(
-            alpha + d1alpha * dt + (1 / 2) * q.a * dt ** 2,
-            beta + d1beta * dt + (1 / 2) * q.b * dt ** 2,
-            gamma + d1gamma * dt + (1 / 2) * q.c * dt ** 2,
-            d1alpha + r.a * dt,
-            d1beta + r.b * dt,
-            d1gamma + r.c * dt
-        );
-
-        d2alpha = (p.a + q.a + r.a) / 3;
-        d2beta = (p.b + q.b + r.b) / 3;
-        d2gamma = (p.c + q.c + r.c) / 3;
-
-        alpha += dt * d1alpha + 0.5 * dt ** 2 * ((p.a + q.a + r.a) / 3);
-        beta += dt * d1beta + 0.5 * dt ** 2 * ((p.b + q.b + r.b) / 3);
-        gamma += dt * d1gamma + 0.5 * dt ** 2 * ((p.c + q.c + r.c) / 3);
-    }
-    d1alpha += dt * ((p.a + 2 * q.a + 2 * r.a + s.a) / 6);
-    d1beta += dt * ((p.b + 2 * q.b + 2 * r.b + s.b) / 6);
-    d1gamma += dt * ((p.c + 2 * q.c + 2 * r.c + s.c) / 6);
+    if(beta+dt*d1beta+0.5*dt**2*d2beta>=2*PI||beta+dt*d1beta+0.5*dt**2*d2beta<=0.01||gamma+dt*d1gamma+0.5*dt**2*d2gamma>=2*PI||gamma+dt*d1gamma+0.5*dt**2*d2gamma<=0.01){
+        if(beta+dt*d1beta+0.5*dt**2*d2beta>=2*PI||beta+dt*d1beta+0.5*dt**2*d2beta<=0.01){
+        d1beta *= -coefRestitution;
+        };
+        if(gamma+dt*d1gamma+0.5*dt**2*d2gamma>=2*PI||gamma+dt*d1gamma+0.5*dt**2*d2gamma<=0.01){
+        d1gamma *= -coefRestitution;
+        };
+        p = calculsAccAngu(alpha,beta,gamma,d1alpha,d1beta,d1gamma);
+        q = calculsAccAngu(alpha+d1alpha*dt/2,beta+d1beta*dt/2,gamma+d1gamma*dt/2,d1alpha+p.a*dt/2,d1beta+p.b*dt/2,d1gamma+p.c*dt/2);
+        r = calculsAccAngu(alpha+d1alpha*dt/2+1/2*p.a*(dt/2)**2,beta+d1beta*dt/2+1/2*p.b*(dt/2)**2,gamma+d1gamma*dt/2+1/2*p.c*(dt/2)**2, d1alpha+q.a*dt/2,d1beta+q.b*dt/2,d1gamma+q.c*dt/2);
+        s = calculsAccAngu(alpha+d1alpha*dt+1/2*q.a*(dt)**2,beta+d1beta*dt+1/2*q.b*(dt)**2,gamma+d1gamma*dt+1/2*q.c*(dt)**2, d1alpha+r.a*dt,d1beta+r.b*dt,d1gamma+r.c*dt);
+        d2alpha = (p.a+q.a+r.a)/3;
+        d2beta = (p.b+q.b+r.b)/3;
+        d2gamma = (p.c+q.c+r.c)/3;
+    };
+    alpha   += dt*d1alpha + 0.5*dt**2*d2alpha;
+    beta    += dt*d1beta + 0.5*dt**2*d2beta;
+    gamma   += dt*d1gamma + 0.5*dt**2*d2gamma;
+    d1alpha += dt*((p.a+2*q.a+2*r.a+s.a)/6);
+    d1beta  += dt*((p.b+2*q.b+2*r.b+s.b)/6);
+    d1gamma += dt*((p.c+2*q.c+2*r.c+s.c)/6);
     
     //Ajout dans les listes
     angles.push({
@@ -680,36 +482,11 @@ function RungeKutta(dt, presenceBalle) {
         c: d2gamma,
     });
 
-    let E =
-        (1 / 2) *
-        (m1 * (l1 ** 2 + l4 ** 2) +
-            mb * lb ** 2 -
-            2 * m1 * l1 * l4 * Math.cos(gamma) +
-            m2 * (l2 ** 2 + l5 ** 2) -
-            2 * m2 * l2 * l5 * Math.cos(beta)) *
-        d1alpha ** 2 +
-        (1 / 2) * m1 * l4 ** 2 * d1gamma ** 2 +
-        (1 / 2) * m2 * l5 ** 2 * d1beta ** 2 +
-        m1 * (l4 ** 2 - l1 * l4 * Math.cos(gamma)) * d1alpha * d1gamma +
-        m2 * (-(l5 ** 2) + l2 * l5 * Math.cos(beta)) * d1alpha * d1beta +
-        g *
-        ((m1 * (massV_weightLenth - masseVolFluide)) / massV_weightLenth +
-            (m2 * (massV_ball - masseVolFluide)) / massV_ball +
-            (mb * (massV_bois - masseVolFluide)) / massV_bois) *
-        l3 +
-        g *
-        (((-m1 * (massV_weightLenth - masseVolFluide)) / massV_weightLenth) * l1 +
-            ((m2 * (massV_ball - masseVolFluide)) / massV_ball) * l2 +
-            ((mb * (massV_bois - masseVolFluide)) / massV_bois) * lb) *
-        Math.cos(alpha) -
-        ((g * (massV_ball - masseVolFluide)) / massV_ball) *
-        m2 *
-        l5 *
-        Math.cos(beta - alpha) +
-        ((g * (massV_weightLenth - masseVolFluide)) / massV_weightLenth) *
-        m1 *
-        l4 *
-        Math.cos(gamma + alpha);
+    let E = (1 / 2) * (m1 * (l1 ** 2 + l4 ** 2) + mb * lb ** 2 - 2 * m1 * l1 * l4 * Math.cos(gamma) + m2 * (l2 ** 2 + l5 ** 2) - 2 * m2 * l2 * l5 * Math.cos(beta)) * d1alpha ** 2 +
+        (1 / 2) * m1 * l4 ** 2 * d1gamma ** 2 + (1 / 2) * m2 * l5 ** 2 * d1beta ** 2 + m1 * (l4 ** 2 - l1 * l4 * Math.cos(gamma)) * d1alpha * d1gamma +
+        m2 * (-(l5 ** 2) + l2 * l5 * Math.cos(beta)) * d1alpha * d1beta + g *(-m1 * l1 + m2 * l2 + mb * lb) * Math.cos(alpha) - g * m2 * l5 * Math.cos(beta - alpha) +
+        g * m1 * l4 * Math.cos(gamma + alpha) + g*(m1+m2+mb)*l3;
+
     ETreb.push(E);
     
     //calcul de la position du projectile
@@ -740,15 +517,15 @@ function RungeKutta(dt, presenceBalle) {
     }
 }
 
-//1.2. Balistique
+//1.2. balistique
 function balistique(vi, incl, xi, yi) {
-    let cf = coefTrainee; //coef trainée
-    let rho = masseVolFluide; // Masse volumique du fluide
+    let cf = coefTrainee; //coefficient de trainée
+    let rho = masseVolFluide; //masse volumique du fluide
     let v = vi; //vitesse
-    let d = simDT; // dt
+    let d = simDT; //dt
     let m = m2;
     let r = r2;
-    let x = xi;
+    let x = xi; //dernière position de x avant le lancer = première position parabolique de x 
     let y = yi;
     let vx = v * Math.cos((incl / 180) * PI);
     let vy = v * Math.sin((incl / 180) * PI);
@@ -756,40 +533,30 @@ function balistique(vi, incl, xi, yi) {
     let air = PI * r ** 2;
     let vol = (4 / 3) * PI * r ** 3;
     let inclrel = inc(
-        vx - vvent * Math.cos((ivent / 180) * PI),
-        vy - vvent * Math.sin((ivent / 180) * PI)
+        -vx + vvent * Math.cos((ivent / 180) * PI),
+        -vy + vvent * Math.sin((ivent / 180) * PI)
     );
 
-    function ft(vx, vy) {
+    function ft(vx, vy) { //force de traînée
         let v =
-            ((vx - vvent * Math.cos((ivent / 180) * PI)) ** 2 +
-                (vy - vvent * Math.sin((ivent / 180) * PI)) ** 2) **
+            ((-vx + vvent * Math.cos((ivent / 180) * PI)) ** 2 +
+                (-vy + vvent * Math.sin((ivent / 180) * PI)) ** 2) **
             0.5;
         return (cf * rho * air * v ** 2) / 2;
     }
 
-    function fm(vx, vy) {
+    function fm(vx, vy) { //effet Magnus
         let v =
-            ((vx - vvent * Math.cos((ivent / 180) * PI)) ** 2 +
-                (vy - vvent * Math.sin((ivent / 180) * PI)) ** 2) **
+            ((-vx + vvent * Math.cos((ivent / 180) * PI)) ** 2 +
+                (-vy + vvent * Math.sin((ivent / 180) * PI)) ** 2) **
             0.5;
         return ((0.5 * PI * rho * r ** 3 * w) / 180) * PI * v;
     }
 
-    function fA(vol) {
-        return rho * vol * g;
-    }
-
-    function a(vx, vy) {
+    function a(vx, vy) { //accélération du projectile en l'air
         return {
-            x: (-ft(vx, vy) * Math.cos((inclrel / 180) * PI) +
-                    fm(vx, vy) * Math.sin((inclrel / 180) * PI)) /
-                m,
-            y: (-ft(vx, vy) * Math.sin((inclrel / 180) * PI) -
-                    m * g -
-                    fm(vx, vy) * Math.cos((inclrel / 180) * PI) +
-                    fA(vol)) /
-                m,
+            x: (ft(vx, vy) * Math.cos((inclrel / 180) * PI) - fm(vx, vy) * Math.sin((inclrel / 180) * PI)) /m,
+            y: (ft(vx, vy) * Math.sin((inclrel / 180) * PI) - m * g + fm(vx, vy) * Math.cos((inclrel / 180) * PI))/m,
         };
     }
 
@@ -837,12 +604,11 @@ function balistique(vi, incl, xi, yi) {
         }
 
         v = (vx ** 2 + vy ** 2) ** 0.5;
-        vitesses.push(v);
-
+        vitesses.push(v); 
         incl = inc(vx, vy);
         inclrel = inc(
-            vx - vvent * Math.cos((ivent / 180) * PI),
-            vy - vvent * Math.sin((ivent / 180) * PI)
+            -vx + vvent * Math.cos((ivent / 180) * PI),
+            -vy + vvent * Math.sin((ivent / 180) * PI)
         );
 
         positionsx.push(x);
@@ -852,13 +618,12 @@ function balistique(vi, incl, xi, yi) {
         t += d;
         i += 1;
     }
-
 }
 
-//====== 2. Fonctions pour l'affichage (utilisée dans la fonction "Display") ======//
-//2.1. affiche le trebuchet et la trajectoire de la balle
+//====== 2. FONCTIONS POUR L'AFFICHAGE (utilisée dans la fonction "Display") ======//
+//2.1. affichage le trébuchet et la trajectoire de la balle
 function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale) {
-    //On vide le canvas avant d'afficher la nouvelle frame
+    //vide le canvas avant d'afficher la nouvelle frame
     ctx.clearRect(0, 0, simulation.width, simulation.height);
 
     //calcul des points du trébuchet
@@ -891,7 +656,7 @@ function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale) {
     };
 
     //affichage du trébuchet
-    //pied:
+    //pied
     ctx.lineWidth = 0.4 * scale;
     ctx.strokeStyle = colors.trebuchetColor1;
     ctx.beginPath();
@@ -899,12 +664,14 @@ function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale) {
     ctx.lineTo(c.x, c.y + 0.55 * scale);
     ctx.lineTo(c.x + (l3 / 3) * scale, simulation.height);
     ctx.stroke();
-    //barre:
+
+    //barre
     ctx.beginPath();
     ctx.moveTo(b.x, b.y);
     ctx.lineTo(d.x, d.y);
     ctx.stroke();
-    //frondes:
+
+    //fronde et longueur du contrepoids
     ctx.lineWidth = 0.3 * scale;
     ctx.strokeStyle = colors.trebuchetColor2;
     ctx.beginPath();
@@ -915,7 +682,8 @@ function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale) {
     ctx.moveTo(d.x, d.y);
     ctx.lineTo(e.x, e.y);
     ctx.stroke();
-    //point de pivot principal + autres points de pivot:
+
+    //point de pivot principal et autres points de pivot
     ctx.fillStyle = colors.trebuchetColor3;
     ctx.beginPath();
     ctx.arc(b.x, b.y, 0.22 * scale, 0, 2 * PI);
@@ -928,7 +696,8 @@ function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale) {
     ctx.fillStyle = colors.trebuchetColor2;
     ctx.arc(a.x, a.y, 0.14 * scale, 0, 2 * PI);
     ctx.fill();
-    //masses:
+
+    //masses
     ctx.beginPath();
     ctx.fillStyle = colors.masseColor;
     ctx.arc(e.x, e.y, 1.5 * r1 * scale, 0, 2 * PI);
@@ -946,7 +715,7 @@ function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale) {
     );
     ctx.fill();
 
-    //Sol
+    //sol
     ctx.strokeStyle = colors.groundColor;
     ctx.lineWidth = scale;
     ctx.beginPath();
@@ -954,7 +723,7 @@ function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale) {
     ctx.lineTo(simulation.width, simulation.height);
     ctx.stroke();
 
-    //affichage points précèdents
+    //affichage points précédents
     if (animPoints.length > 0) {
         for (let k = 0; k < animPoints.length; k++) {
             ctx.beginPath();
@@ -989,25 +758,27 @@ function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale) {
         }
     }
 
-    //Affichage des données
+    //affichage des données
     if (l2 + l5 + r2 > l1 + l4 + r1) {
         document.getElementById("xposLabel").innerText = (pos.x - (l2 + l5 + r2)).toFixed(3);
     } else {
         document.getElementById("xposLabel").innerText = (pos.x - (l1 + l4 + r1)).toFixed(3);
     }
     document.getElementById("yposLabel").innerText = pos.y.toFixed(3);
+
     document.getElementById("speedLabel").innerText = vitesse.toFixed(3);
-    document.getElementById("rMaxLabel").innerText = (Rmax).toFixed(3);
+
+    document.getElementById("RmaxLabel").innerText = (Rmax).toFixed(3);
 
     document.getElementById("timeLabel").innerText = (simDT * i).toFixed(3);
     
-    //angles alpha, beta, gamma du trébuchet:
+    //angles alpha, beta, gamma du trébuchet
     document.getElementById("alphaLabel").innerText = (((alpha % 2) * PI * 180) / PI).toFixed(3);
     document.getElementById("betaLabel").innerText = (((beta % 2) * PI * 180) / PI).toFixed(3);
     document.getElementById("gammaLabel").innerText = (((gamma % 2) * PI * 180) / PI).toFixed(3);
     document.getElementById("energieLabel").innerText = Energy.toFixed(3);
 
-    //Affichage de la flèche indiquant le sens du vent
+    //affichage de la flèche indiquant le sens du vent
     if (vvent != 0) {
         ctx.fillStyle = colors.directionVentColor;
         ctx.font = "15px Trebuchet MS";
@@ -1022,10 +793,12 @@ function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale) {
 
 }
 
-//Affiche une  flèche sur le canvas
+//affichage d'une  flèche sur le canvas
 function canvas_arrow(centerx, centery, length, angle) {
+
     let endangle = PI / 6;
     let endlength = 15;
+
     ctx.lineWidth = 4;
     ctx.strokeStyle = colors.directionVentColor;
     ctx.beginPath();
@@ -1033,8 +806,10 @@ function canvas_arrow(centerx, centery, length, angle) {
         centerx - (Math.cos(angle) * length) / 2,
         centery + (Math.sin(angle) * length) / 2
     );
+
     let endx = centerx + (Math.cos(angle) * length) / 2;
     let endy = centery - (Math.sin(angle) * length) / 2;
+
     ctx.lineTo(endx, endy);
     ctx.stroke();
     ctx.beginPath();
@@ -1049,15 +824,15 @@ function canvas_arrow(centerx, centery, length, angle) {
     );
     ctx.stroke();
 }
-//====== 3. Fonctions principales ======//
-//3.1. Fonctions faisant la simulation (calculs)
+//====== 3. FONCTIONS PRINCIPALES ======//
+//3.1. fonctions faisant la simulation
 function calculate() {
     //SIMULATION DU TREBUCHET//
     //Initialisation de la simulation
     d1alpha = 0;
     d1gamma = 0;
     d1beta = 0;
-    r1 = ((3 * m1) / (4 * PI * massV_weightLenth)) ** (1 / 3);
+    r1 = ((3 * m1) / (4 * PI * massV_contrepoids)) ** (1 / 3);
     r2 = ((3 * m2) / (4 * PI * massV_ball)) ** (1 / 3);
 
     //Calculs de la portée
@@ -1087,23 +862,19 @@ function calculate() {
     positionsx.push(x);
     positionsy.push(y);
 
-    vitesses.push((l2 ** 2 * d1alpha ** 2 + l5 ** 2 * (d1beta - d1alpha) ** 2 + 2 * l2 * l5 * d1alpha * (d1beta - d1alpha) * Math.cos(beta)) ** 0.5
-    );
-    inclinaisons.push(
-        inc(
-            -l2 * d1alpha * Math.cos(alpha) - l5 * (d1beta - d1alpha) * Math.cos(beta - alpha),
-            -l2 * d1alpha * Math.sin(alpha) + l5 * (d1beta - d1alpha) * Math.sin(beta - alpha)
-        )
-    );
-    let E = (1 / 2) * (m1 * (l1 ** 2 + l4 ** 2) + mb * lb ** 2 - 2 * m1 * l1 * l4 * Math.cos(gamma) + m2 * (l2 ** 2 + l5 ** 2) - 2 * m2 * l2 * l5 * Math.cos(beta)) * d1alpha ** 2 + (1 / 2) * m1 * l4 ** 2 * d1gamma ** 2 + (1 / 2) * m2 * l5 ** 2 * d1beta ** 2 + m1 * (l4 ** 2 - l1 * l4 * Math.cos(gamma)) * d1alpha * d1gamma + m2 * (-(l5 ** 2) + l2 * l5 * Math.cos(beta)) * d1alpha * d1beta + g * ((m1 * (massV_weightLenth - masseVolFluide)) / massV_weightLenth + (m2 * (massV_ball - masseVolFluide)) / massV_ball + (mb * (massV_bois - masseVolFluide)) / massV_bois) * l3 + g * (((-m1 * (massV_weightLenth - masseVolFluide)) / massV_weightLenth) * l1 + ((m2 * (massV_ball - masseVolFluide)) / massV_ball) * l2 + ((mb * (massV_bois - masseVolFluide)) / massV_bois) * lb) * Math.cos(alpha) - ((g * (massV_ball - masseVolFluide)) / massV_ball) * m2 * l5 * Math.cos(beta - alpha) + ((g * (massV_weightLenth - masseVolFluide)) / massV_weightLenth) * m1 * l4 * Math.cos(gamma + alpha);
-
+    vitesses.push((l2 ** 2 * d1alpha ** 2 + l5 ** 2 * (d1beta - d1alpha) ** 2 + 2 * l2 * l5 * d1alpha * (d1beta - d1alpha) * Math.cos(beta)) ** 0.5);
+    inclinaisons.push(inc(-l2 * d1alpha * Math.cos(alpha) - l5 * (d1beta - d1alpha) * Math.cos(beta - alpha), -l2 * d1alpha * Math.sin(alpha) + l5 * (d1beta - d1alpha) * Math.sin(beta - alpha)));
+    let E = (1 / 2) * (m1 * (l1 ** 2 + l4 ** 2) + mb * lb ** 2 - 2 * m1 * l1 * l4 * Math.cos(gamma) + m2 * (l2 ** 2 + l5 ** 2) - 2 * m2 * l2 * l5 * Math.cos(beta)) * d1alpha ** 2 +
+        (1 / 2) * m1 * l4 ** 2 * d1gamma ** 2 + (1 / 2) * m2 * l5 ** 2 * d1beta ** 2 + m1 * (l4 ** 2 - l1 * l4 * Math.cos(gamma)) * d1alpha * d1gamma +
+        m2 * (-(l5 ** 2) + l2 * l5 * Math.cos(beta)) * d1alpha * d1beta + g *(-m1 * l1 + m2 * l2 + mb * lb) * Math.cos(alpha) - g * m2 * l5 * Math.cos(beta - alpha) +
+        g * m1 * l4 * Math.cos(gamma + alpha)+ g*(m1+m2+mb)*l3;
     ETreb.push(E);
     i += 1;
-
-    //Simulation trébuchet
+    
+    //Simulation du trébuchet
     m2 += masseFronde;
 
-    //Utilisation de la fonction correspondante en fonction de la méthode choisie
+    //utilisation de la fonction correspondante en fonction de la méthode choisie
     switch (methode) {
         case "RungeKutta":
             RungeKutta(simDT, true);
@@ -1115,8 +886,9 @@ function calculate() {
             Heun(simDT, true);
     }
     i += 1;
+
     while (beta - alpha - PI / 2 < releaseAngle ) {
-        //Simulation jusaqu'à ce que l'angle de la vitesse corresponde à l'angle de libération
+        //simulation jusqu'à ce que l'inclinaison de la vitesse corresponde à l'angle de libération
         switch (methode) {
             case "RungeKutta":
                 RungeKutta(simDT, true);
@@ -1127,15 +899,16 @@ function calculate() {
             default:
                 Heun(simDT, true);
         }
+
         t += simDT;
         i += 1;
     }
-    m2 = Math.abs(document.getElementById("m2").value);
+    m2 = Math.abs(e_m2.value);
     t -= simDT;
     i -= 1;
     i_release = i;
 
-    //SIMULATION DE LA BALLISTIQUE//
+    //SIMULATION DE LA BALISTIQUE//
     balistique(
         vitesses[i_release],
         inclinaisons[i_release],
@@ -1146,6 +919,7 @@ function calculate() {
     //fonction si l'on veut que le trébuchet continue à bouger pendant que la balle est en chute libre
     i_continue = i_release;
     m2 = masseFronde;
+
     while (i_continue < i && l3 + l2 * Math.cos(alpha) - l5 * Math.cos(beta - alpha) >= 0) {
         switch (methode) {
             case "RungeKutta":
@@ -1159,13 +933,13 @@ function calculate() {
         }
         i_continue += 1;
     }
-    m2 = Math.abs(document.getElementById("m2").value);
+    m2 = Math.abs(e_m2.value);
 
 }
 
-//3.2. Fonction pour trouver le bon coefficient d'affichage
+//3.2. fonction pour trouver le bon coefficient d'affichage
 function Scale() {
-    //Calcul du coéfficient de zoom pour l'affichage
+    //calcul du coefficient de zoom pour l'affichage
     if (xmin > miax(positionsx)[1]) {
         xmin = miax(positionsx)[1];
     }
@@ -1197,20 +971,21 @@ function Scale() {
             ymax = l1 + l4 + r1;
         }
     }
+
     var cx = simulation.width / (1.1 * (xmax - xmin));
     var cy = simulation.height / (1.1 * ymax);
     scale = (cx <= cy) ? cx : cy;
 }
 
-//3.3. AFFICHAGE DU RESULTAT SUR LE CANVAS//
+//3.3. affichage du résultat sur le canvas//
 function displaySim(i, slowMotion) {
     
     let currentEnergy;
-    //On masque le schéma
+    //masque le schéma
     document.getElementById("schema").style.display = "none"
-    //On crée la boucle d'animation
+    //crée la boucle d'animation
     animInterval = setInterval(() => {
-        //Si la simulation n'est pas finie
+        //si la simulation n'est pas finie
         if (i < positionsx.length) {
             if (i < i_continue - 1) {
                 if (i <= i_release) {
@@ -1220,25 +995,21 @@ function displaySim(i, slowMotion) {
                     currentEnergy =
                         ETreb[i] +
                         (1 / 2) * m2 * vitesses[i] ** 2 +
-                        ((m2 * (massV_ball - masseVolFluide)) / massV_ball) *
-                        g *
-                        positionsy[i];
+                        m2 * g * positionsy[i];
                     Energies.push(currentEnergy);
                 }
             } else {
                 currentEnergy =
                     ETreb[ETreb.length - 3] +
                     (1 / 2) * m2 * vitesses[i] ** 2 +
-                    ((m2 * (massV_ball - masseVolFluide)) / massV_ball) *
-                    g *
-                    positionsy[i];
+                    m2 * g * positionsy[i];
                 Energies.push(currentEnergy);
             }
 
             //calcul du coefficient de zoom du trébuchet
             var trebuchetScale = (simulation.width / (l1 + l2 + l3 + l5)) <= (simulation.height / (l2 + l3 + l5)) ? (simulation.width / (l1 + l2 + l3 + l5)) : (simulation.height / (l2 + l3 + l5));
 
-            //zoom sur le trébuchet si le projectil n'est pas encore lancé ou si le focus mode est activé
+            //zoom sur le trébuchet si le projectile n'est pas encore lancé ou si le focus mode est activé
             if (i < i_release || focusMode) {
                 currentScale = trebuchetScale;
             } else {
@@ -1251,7 +1022,7 @@ function displaySim(i, slowMotion) {
                 }
             }
 
-            //On appelle la fonction qui dessine la frame sur la canvas
+            //appelle la fonction qui dessine la frame sur la canvas
             draw(
                 angles[i].a,
                 angles[i].b,
@@ -1262,22 +1033,22 @@ function displaySim(i, slowMotion) {
                 i,
                 currentScale
             );
-            //On incrémante la variable i pour afficher la frame suivante au prochain tour de boucle
+            //incrémante la variable i pour afficher la frame suivante au prochain tour de boucle
             i += 1;
             sauv = i;
         }
-        //Si la simulation est finie
+        //si la simulation est finie
         else {
-            //On réactive les boutons qui avaient été désactivé dans la fonction startSim()
+            //réactive les boutons qui avaient été désactivé dans la fonction startSim()
             document.getElementById("btnStart").disabled = false;
             document.getElementById("btnPause").disabled = true;
             document.getElementById("btnStop").disabled = true;
             document.getElementById("btnSlowMotion").disabled = true;
             document.getElementById("resolutions").disabled = false;
-            //On arrête la boucle qui affiche les frames
+            //arrête la boucle qui affiche les frames
             clearInterval(animInterval);
             SimulationStatus = false;
-            //et on affiche les graphiques sur l'autre onglet
+            //affiche les graphiques sur l'autre onglet
             drawGraph();
         }
     }, simDT * 1000 * slowMotion);
@@ -1295,12 +1066,16 @@ function Initialisation() {
     l4 = Math.abs(e_l4.value);
     l5 = Math.abs(e_l5.value);
     lb = (l2 - l1) / 2;
+
     vvent = document.getElementById("vvent").value;
     ivent = document.getElementById("ivent").value;
+
     releaseAngle = document.getElementById("a").value;
     w = document.getElementById("w").value;
+
     methode = document.getElementById("resolutions").value;
-    //on modifie les valeurs dans le formualire car elle on peut-être changé (car on prend la valeur absolue)
+
+    //modifie les valeurs dans le formulaire car elle ont peut-être changé (valeur absolue)
     e_m1.value = m1;
     e_m2.value = m2;
     e_mb.value = mb;
@@ -1310,7 +1085,7 @@ function Initialisation() {
     e_l4.value = l4;
     e_l5.value = l5;
     
-    //On met les variable à 0 (elles peuvent ne pas être à 0 si on a déjà fait une simulation)
+    //met les variable à 0 (elles peuvent ne pas être à 0 si on a déjà fait une simulation)
     t = 0;
     i = 0;
     positionsx = [];
@@ -1327,11 +1102,11 @@ function Initialisation() {
     SimulationStatus = true;
     ral = 1;
 
-    //On remet les textes correcte dans les bouttons
+    //remet les textes corrects dans les bouttons
     document.getElementById("btnSlowMotion").value = "Ralenti";
     document.getElementById("btnPause").value = "Pause";
 
-    //on verifie la validité des valeurs
+    //vérifie la validité des valeurs
     if (l3 / l2 > 1) {
         window.alert( "Valeur.s aberrante.s ou impossible.s. La simulation ne peut pas fonctionner.");
         Erreur = true;
@@ -1345,6 +1120,7 @@ function Initialisation() {
         releaseAngle >= 360 ||
         m1 == 0 ||
         m2 == 0 ||
+        mb == 0 ||
         l1 == 0 ||
         l2 == 0 ||
         l3 == 0 ||
@@ -1352,24 +1128,24 @@ function Initialisation() {
         l5 == 0
     ) {
         window.alert(
-            "Valeur.s aberrante.s ou impossible.s. La simulation ne peut pas fonctionner."
+            "Valeurs aberrantes ou impossibles. La simulation ne peut pas fonctionner."
         );
         Erreur = true;
     }
-    //convertion de l'angle en rad
+    //conversion de degrés en radians
     releaseAngle *= PI / 180;
 }
 
-//====== 4. Fonction des boutons ======//
-//4.1. Lance la simulation
+//====== 4. FONCTIONS POUR LES BOUTONS ======//
+//4.1. lance la simulation
 function startSim() {
     //initialise la simulation
     Initialisation();
-    //on verifie qu'il n'y ait pas d'erreur. S'il n'y en a pas on calcule et on lance la simulation
+    //vérifie qu'il n'y ait pas d'erreur. S'il n'y en a pas, on calcule et on lance la simulation
     if (!Erreur) {
         calculate();
         Scale();
-    //On désactive les bouttons pendant la simulation
+    //désactive les boutons pendant la simulation
         document.getElementById("resolutions").disabled = true;
         document.getElementById("btnStart").disabled = true;
         document.getElementById("btnStop").disabled = false;
@@ -1378,14 +1154,14 @@ function startSim() {
         document.getElementById("resolutions").disabled = false;
         displaySim(0, ral);
     } else {
-        //Sinon en arrête
+        //sinon en arrête
         return;
     }
 }
 
-//4.2. Stoppe la simulation
+//4.2. stoppe la simulation
 function Stop() {
-    //On arrête la boucle de l'annimation et on réactive les bouttons
+    //arrête la boucle de l'animation et réactive les boutons
     clearInterval(animInterval);
     document.getElementById("btnStart").disabled = false;
     document.getElementById("resolutions").disabled = false;
@@ -1394,11 +1170,13 @@ function Stop() {
     document.getElementById("btnSlowMotion").disabled = true;
 }
 
-//4.3. Arrête ou relance la simulation
+//4.3. arrête ou relance la simulation
 function OnOff() {
+
     document.getElementById("btnPause").disabled = true;
     document.getElementById("btnSlowMotion").disabled = true;
     document.getElementById("btnStop").disabled = true;
+
     if (Pause == false) {
         Pause = true;
         clearInterval(animInterval);
@@ -1408,17 +1186,20 @@ function OnOff() {
         Pause = false;
         document.getElementById("btnPause").value = "Pause";
     }
+
     document.getElementById("btnPause").disabled = false;
     document.getElementById("btnSlowMotion").disabled = false;
     document.getElementById("btnStop").disabled = false;
 }
 
-//4.4. Ralenti
-//4.4.1.Ralentit la simulation
+//4.4. ralenti
+//4.4.1. ralentit la simulation
 function slowMotion() {
+
     document.getElementById("btnPause").disabled = true;
     document.getElementById("btnSlowMotion").disabled = true;
     document.getElementById("btnStop").disabled = true;
+
     if (Pause == false) {
         if (Ralenti == false) {
             clearInterval(animInterval);
@@ -1446,49 +1227,60 @@ function slowMotion() {
             document.getElementById("btnSlowMotion").value = "Ralenti";
         }
     }
+
     document.getElementById("btnSlowMotion").disabled = false;
     document.getElementById("btnPause").disabled = false;
     document.getElementById("btnStop").disabled = false;
 }
-//4.4.2.fonction pour le curseur ralenti
+//4.4.2. fonction pour le curseur ralenti
 function RalentiCursorFunction() {
+
     ral = Math.abs(document.getElementById("ralenticurseur").value);
     e_ral.innerHTML = `Vitesse: ${ral}x`;
-    /*document.getElementById("inputralenti").value = ral;*/
+
     if (Ralenti == true && Pause == false) {
         document.getElementById("btnPause").disabled = true;
         document.getElementById("btnSlowMotion").disabled = true;
         document.getElementById("btnStop").disabled = true;
+
         clearInterval(animInterval);
         displaySim(sauv, ral);
+
         document.getElementById("btnPause").disabled = false;
         document.getElementById("btnSlowMotion").disabled = false;
         document.getElementById("btnStop").disabled = false;
     }
 }
-//4.4.3.fonction pour l'input ralenti
+//4.4.3. fonction pour l'input ralenti
 function InputRalentiFunction() {
+
     ral = Math.abs(document.getElementById("inputralenti").value);
     e_ral.innerHTML = "Ralenti: x" + ral;
     document.getElementById("ralenticurseur").value = ral;
+
     if (Ralenti == true && Pause == false) {
         document.getElementById("btnPause").disabled = true;
         document.getElementById("btnSlowMotion").disabled = true;
         document.getElementById("btnStop").disabled = true;
+
         clearInterval(animInterval);
         displaySim(sauv, ral);
+
         document.getElementById("btnPause").disabled = false;
         document.getElementById("btnSlowMotion").disabled = false;
         document.getElementById("btnStop").disabled = false;
     }
 }
 
-//4.5. Redimensionne la simulation
+//4.5. redimensionne la simulation
 function Resize() {
+
     simulation.width = window.innerWidth * 0.85;
     simulation.height = window.innerHeight * 0.9;
+
     var cx = simulation.width / (1.1 * (xmax - xmin));
     var cy = simulation.height / (1.1 * ymax);
+
     if (cx <= cy) {
         scale = cx;
     } else {
@@ -1511,7 +1303,11 @@ function Resize() {
 window.onresize = function () {
     Resize()
 }
+//4.6 changement de mode de focalisation
 function focusModeChange() {
+
     focusMode = document.getElementById("focus").checked;
-    document.getElementById("focusModeLabel").innerHTML = focusMode?"On":"Off"
+    doocument.getElementById("focusModeLabel").innerHTML = focusMode?"On":"Off"
 }
+
+//====== FIN ======//

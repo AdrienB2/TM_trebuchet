@@ -1,7 +1,7 @@
 //variable avec les temps à afficher sur l'axe x du graphique
 let chartTime = [];
 
-//création de tous les graphiques avec la bibliothèqie Chart.js (pour plus d'infos sur le fonctionnement: https://www.chartjs.org/docs/latest/)
+//création de tous les graphiques avec la bibliothèque Chart.js (pour plus d'infos sur le fonctionnement : https://www.chartjs.org/docs/latest/)
 let alphaChartCan = document.getElementById("alphaChart").getContext("2d");
 var alphaChart = new Chart(alphaChartCan, {
     type: "line",
@@ -40,6 +40,7 @@ var alphaChart = new Chart(alphaChartCan, {
         },
     },
 });
+
 let betaChartCan = document.getElementById("betaChart").getContext("2d");
 var betaChart = new Chart(betaChartCan, {
     type: "line",
@@ -76,6 +77,7 @@ var betaChart = new Chart(betaChartCan, {
         },
     },
 });
+
 let gammaChartCan = document.getElementById("gammaChart").getContext("2d");
 var gammaChart = new Chart(gammaChartCan, {
     type: "line",
@@ -112,6 +114,7 @@ var gammaChart = new Chart(gammaChartCan, {
         },
     },
 });
+
 let xChartCan = document.getElementById("xChart").getContext("2d");
 var xChart = new Chart(xChartCan, {
     type: "line",
@@ -148,6 +151,7 @@ var xChart = new Chart(xChartCan, {
         },
     },
 });
+
 let yChartCan = document.getElementById("yChart").getContext("2d");
 var yChart = new Chart(yChartCan, {
     type: "line",
@@ -184,6 +188,7 @@ var yChart = new Chart(yChartCan, {
         },
     },
 });
+
 let speedChartCan = document.getElementById("speedChart").getContext("2d");
 var speedChart = new Chart(speedChartCan, {
     type: "line",
@@ -220,6 +225,7 @@ var speedChart = new Chart(speedChartCan, {
         },
     },
 });
+
 let energyChartCan = document.getElementById("energyChart").getContext("2d");
 var energyChart = new Chart(energyChartCan, {
     type: "line",
