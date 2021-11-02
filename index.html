@@ -38,19 +38,16 @@
                         <label class="menuLabel" for="pivotHeight">Hauteur du pivot [m]</label>
                         <input class="menuInput" type="number" id="pivotHeight" value=4>
 
-                        <label class="menuLabel" for="weightLenth">Longueur du contrepoids [m]</label>
-                        <input class="menuInput" type="number" id="weightLenth" value=1.4>
+                        <label class="menuLabel" for="weightLength">Longueur du contrepoids [m]</label>
+                        <input class="menuInput" type="number" id="weightLength" value=1.4>
 
-                        <!-- <label class="menuLabel" for="weightLenth">Position du centre de masse de la barre (par rapport au point de pivot) [m]</label>
-                        <input class="menuInput" type="number" id="lb" value=0> !-->
-
-                        <label class="menuLabel" for="weightLenth">Masse du projectile [kg]</label>
+                        <label class="menuLabel" for="m2">Masse du projectile [kg]</label>
                         <input class="menuInput" type="number" id="m2" value=15>                
 
-                        <label class="menuLabel" for="weightLenth">Masse du contrepoids [kg]</label>
+                        <label class="menuLabel" for="m1">Masse du contrepoids [kg]</label>
                         <input class="menuInput" type="number" id="m1" value=2000>                
 
-                        <label class="menuLabel" for="weightLenth">Masse de la barre [kg]</label>
+                        <label class="menuLabel" for="mb">Masse de la barre [kg]</label>
                         <input class="menuInput" type="number" id="mb" value=100> 
 
                         <label class="menuLabel" for="a">Angle de libération [&#176]</label>
@@ -95,10 +92,10 @@
                         <p class="dataLabel" id="betaLabel2" style="color:blue;">&beta;: <span id="betaLabel">0</span>&#176;</p>
                         <p class="dataLabel" id="gammaLabel2" style="color:green;">&gamma;: <span id="gammaLabel">0</span>&#176;</p>
                         <p class="dataLabel" id="energieLabel2" style="color:orange;">Energie: <span id="energieLabel">0</span>[J]</p>
-                        <p class="dataLabel" id="rMaxLabel2" style="color:gold;">Rmax: <span id="rMaxLabel">0</span>[m]</p>
+                        <p class="dataLabel" id="RmaxLabel2" style="color:gold;">Rmax: <span id="RmaxLabel">0</span>[m]</p>
 
                     </div>
-                    <img id="schema" src="./trebuchet-shema-dark.png" style="width: 50vmin;" alt="">
+                    <img id="schema" src="trebuchet-schema-dark.png" style="width: 50vmin;" alt="">
                     <canvas class="simulation" id = "simulation"></canvas>
                 </div>
             </div>
@@ -146,10 +143,15 @@
             </div>
             <div id="aboutTab" data-tab-content>
                 <h1>À propos</h1>
-                <p>Ce site à été réalisé dans le cadre d'un travail de maturité au Gymnase de Renens. <br> Vous pouvez trouvez le rapport de ce travail <a href="rapport.pdf">ici</a>.</p>
+                <p>Le projet consiste en la simulation 2D d’un trébuchet en utilisant le langage de programmation
+                    JavaScript. L’objectif final étant de pouvoir paramétrer les caractéristiques physiques de l’engin et d’observer, en conséquence, une modification du mouvement. Pour ceci, nous utilisons
+                    les équations de Lagrange, des outils d’intégration numérique ainsi que les lois du mouvement
+                    énoncées par Newton. Ce site a été réalisé dans le cadre de notre travail de Maturité 2020-2021 au Gymnase de Renens. 
+                  <br> Vous pouvez consulter le rapport de ce travail <a href="TM_Rapport.pdf">ici</a>, 
+                  tandis que l'intégralité du code source est disponible au téléchargement <a href="https://github.com/AdrienB2/TM_trebuchet">là</a>.</p>
             </div>
         </div>
-        <script src="js/ui.js"></script>
+        <script src="js/darkmode.js"></script>
         <script src="js/app.js"></script>
         <script src="js/graphs.js"></script>
     </body>
