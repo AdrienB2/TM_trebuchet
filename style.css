@@ -154,7 +154,7 @@ a{
   content: "";
   height: 80%;
   aspect-ratio: 1;
-  left: 10%;
+  left: 7%;
   bottom: 10%;
   background-color: white;
   -webkit-transition: .4s;
@@ -171,9 +171,9 @@ input:focus + .slider {
 }
 
 input:checked + .slider:before {
-  -webkit-transform: translateX(80%);
-  -ms-transform: translateX(80%);
-  transform: translateX(80%);
+  -webkit-transform: translateX(90%);
+  -ms-transform: translateX(90%);
+  transform: translateX(90%);
 }
 
 .slider.round {
