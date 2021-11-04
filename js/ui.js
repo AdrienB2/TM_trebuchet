@@ -89,7 +89,7 @@ function darkModeSwitchChange() {
 switchColorMode(window.matchMedia('(prefers-color-scheme: dark)').matches)
 //change le bouton au chargement de la page pour qu'il corresponde au mode activé dans les réglages
 darkModeSwitch.checked = window.matchMedia('(prefers-color-scheme: dark)').matches
-//fonction qui change le mode sombre/claire si le réglage de l'ordinateur est modifié pendant que la page est ouverte
+//change le mode sombre/claire si le réglage de l'ordinateur est modifié pendant que la page est ouverte
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change", () => {
     switchColorMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
     darkModeSwitch.checked = window.matchMedia('(prefers-color-scheme: dark)').matches
