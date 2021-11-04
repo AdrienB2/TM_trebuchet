@@ -981,8 +981,6 @@ function Scale() {
 function displaySim(i, slowMotion) {
     
     let currentEnergy;
-    //masque le schéma
-    document.getElementById("schema").style.display = "none"
     //crée la boucle d'animation
     animInterval = setInterval(() => {
         //si la simulation n'est pas finie
