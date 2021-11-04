@@ -852,8 +852,6 @@ function Scale() {
 
 //3.3. affichage du résultat sur le canvas//
 function displaySim(i, slowMotion) {
-    //masque le schéma
-    document.getElementById("schema").style.display = "none"
     //crée la boucle d'animation
     animInterval = setInterval(() => {
         //si la simulation n'est pas finie
