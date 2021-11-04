@@ -74,8 +74,6 @@ function switchColorMode(switch2Dark) {
     }
     document.getElementsByClassName("active")[0].style.background = colors.background2
 
-    //changement du schéma de trébuchet
-    document.getElementById("schema").src = `./trebuchet-schema-${switch2Dark ? "dark":"light"}.png`;
 }
 
 //fonction du bouton pour passer du mode sombre au mode clair
