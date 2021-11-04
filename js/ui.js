@@ -1,4 +1,4 @@
-//Tabs
+//tabs
 const tabs = document.querySelectorAll("[data-tab-target]");
 const tabContents = document.querySelectorAll("[data-tab-content]");
 tabs.forEach((tab) => {
@@ -20,7 +20,7 @@ tabs.forEach((tab) => {
     });
 });
 
-//varialbes de couleur
+//variables de couleur
 var colors = {}
 const darkModeSwitch = document.getElementById("darkModeSwitch")
 
@@ -51,7 +51,7 @@ function switchColorMode(switch2Dark) {
     htmlELement.style.background = colors.background
     htmlELement.style.color = colors.textColor
 
-    //changement de la couleur des textes des textes de données
+    //changement de la couleur des textes de données
     document.getElementById("speedLabel2").style.color = colors.speedLabelColor
     document.getElementById("alphaLabel2").style.color = colors.alphaLabelColor
     document.getElementById("betaLabel2").style.color = colors.betaLabelColor
@@ -74,20 +74,20 @@ function switchColorMode(switch2Dark) {
     }
     document.getElementsByClassName("active")[0].style.background = colors.background2
 
-    //changement du schema de trébuchet
+    //changement du schéma de trébuchet
     document.getElementById("schema").src = `./trebuchet-schema-${switch2Dark ? "dark":"light"}.png`;
 }
 
-//fonction sur le bouton pour passer du mode sombre au mode clair
+//fonction du bouton pour passer du mode sombre au mode clair
 function darkModeSwitchChange() {
     switchColorMode(darkModeSwitch.checked)
 }
 
-//On appelle la fonction au chargement de la page pour appliquer le bon mode en fonction des réglages de l'ordinateur
+//appelle la fonction au chargement de la page pour appliquer le bon mode en fonction des réglages de l'ordinateur
 switchColorMode(window.matchMedia('(prefers-color-scheme: dark)').matches)
 //On change le bouton au chargement de la page pour qu'il corresponde au mode activé dans les réglages
 darkModeSwitch.checked = window.matchMedia('(prefers-color-scheme: dark)').matches
-//fonction qui change le mode sombre/claire si le réglage de l'ordinateur est modifié pendant que la page est ouverte
+//change le mode sombre/claire si le réglage de l'ordinateur est modifié pendant que la page est ouverte
 window.matchMedia('(prefers-color-scheme: dark)').addEventListener("change", () => {
     switchColorMode(window.matchMedia('(prefers-color-scheme: dark)').matches);
     darkModeSwitch.checked = window.matchMedia('(prefers-color-scheme: dark)').matches
