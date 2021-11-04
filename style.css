@@ -111,9 +111,6 @@ a{
     align-items: center;
     justify-content: space-around;
 }
-.dataLabel{
-    width: 10%;
-}
 @media only screen and (max-width: 1250px) {
   .chartRow{
       flex-direction: column;
