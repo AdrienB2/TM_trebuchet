@@ -52,14 +52,14 @@ function switchColorMode(switch2Dark) {
     htmlELement.style.color = colors.textColor
 
     //changement de la couleur des textes de données
-    document.getElementById("speedLabel2").style.color = colors.speedLabelColor
-    document.getElementById("alphaLabel2").style.color = colors.alphaLabelColor
-    document.getElementById("betaLabel2").style.color = colors.betaLabelColor
-    document.getElementById("gammaLabel2").style.color = colors.gammaLabelColor
-    document.getElementById("energieLabel2").style.color = colors.energieLabelColor
-    document.getElementById("rMaxLabel2").style.color = colors.rMaxLabelColor
-    document.getElementById("tabs").style.borderBottom = `1px solid ${colors.textColor}`
-    document.getElementById("menu").style.borderRight = `1px solid ${colors.textColor}`
+    document.querySelector("#speedLabel2").style.color = colors.speedLabelColor
+    document.querySelector("#alphaLabel2").style.color = colors.alphaLabelColor
+    document.querySelector("#betaLabel2").style.color = colors.betaLabelColor
+    document.querySelector("#gammaLabel2").style.color = colors.gammaLabelColor
+    document.querySelector("#energieLabel2").style.color = colors.energieLabelColor
+    document.querySelector("#RmaxLabel2").style.color = colors.rMaxLabelColor
+    document.querySelector("#tabs").style.borderBottom = `1px solid ${colors.textColor}`
+    document.querySelector("#menu").style.borderRight = `1px solid ${colors.textColor}`
     //changement de la couleur des éléments du menu
     for (let index = 0; index < document.querySelectorAll(".menuInput").length; index++) {
         const element = document.querySelectorAll(".menuInput")[index].style;
@@ -73,14 +73,24 @@ function switchColorMode(switch2Dark) {
         element.background = colors.background
     }
     document.getElementsByClassName("active")[0].style.background = colors.background2
+    
+    var switchOn = document.querySelector("#switchOn")
+    var switchOff = document.querySelector("#switchOff")
 
+    if (switch2Dark) {
+        switchOff.style.display = 'none'
+        switchOn.style.display = 'block'
+    }
+    else {
+        switchOff.style.display = 'block'
+        switchOn.style.display = 'none'
+    }
 }
 
 //fonction du bouton pour passer du mode sombre au mode clair
 function darkModeSwitchChange() {
     switchColorMode(darkModeSwitch.checked)
 }
-
 //appelle la fonction au chargement de la page pour appliquer le bon mode en fonction des réglages de l'ordinateur
 switchColorMode(window.matchMedia('(prefers-color-scheme: dark)').matches)
 //On change le bouton au chargement de la page pour qu'il corresponde au mode activé dans les réglages
