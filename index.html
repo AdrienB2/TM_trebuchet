@@ -11,7 +11,7 @@
     <body>
         <ul class="tabs" id="tabs">
             <label style=" width: 2%; display: block;">
-                <input type="checkbox" id="darkModeSwitch" onchange="darkModeSwitchChange()" style="display: none;">
+                <input type="checkbox" id="darkModeSwitch" onchange="darkModeSwitchChange()" style="display: none; cursor: pointer;">
                 <svg xmlns="http://www.w3.org/2000/svg" for="darkModeSwitch" id="switchOff" fill="currentColor" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
@@ -68,14 +68,10 @@
                         <label class="menuLabel" id="ralenti" for="ralenticurseur">Ralenti: 1x</label>
                         <input class="menuInput" id="ralenticurseur" value = 2 type="range" min="0.01" max="10" step="0.01" onchange="RalentiCursorFunction()">
 
-                        <label class="menuLabel" for="focus" style="cursor: pointer;">Focalisation sur le trébuchet: <span id="focusModeLabel"> Off</span></label>
-                        <input class="menuInput" type="checkbox" id="focus" onchange="focusModeChange()" style="display: none;">
-                        
-                        
-                        <label class="switch" style="width:10%; height: auto;">
-                            <input type="checkbox" id="darkModeSwitch" onchange="focusModeChange()" style="display: none;">
-                            <span class="slider round"></span>
-                        </label>
+                        <div class="menuInput">
+                            <label class="menuLabel" for="focus" style="cursor: pointer;">Focalisation sur le trébuchet: <span id="focusModeLabel"> Off</span></label>
+                            <input class="menuInput" type="checkbox" id="focus" onchange="focusModeChange()" style="display: none;">
+                        </div>
 
                         <label class="menuLabel" for="resolutions">Méthode de calcul</label>
                         <select class="menuInput" name="resolutions" id="resolutions">
