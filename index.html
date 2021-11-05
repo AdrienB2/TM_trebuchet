@@ -66,6 +66,12 @@
                         <label class="menuLabel" for="focus" style="cursor: pointer;">Focalisation sur le trébuchet : <span id="focusModeLabel"> Off</span></label>
                         <input class="menuInput" type="checkbox" id="focus" onchange="focusModeChange()" style="display: none;">
                         
+                        
+                        <label class="switch" style="width:10%; height: auto;">
+                            <input type="checkbox" id="darkModeSwitch" onchange="focusModeChange()" style="display: none;">
+                            <span class="slider round"></span>
+                        </label>
+
                         <label class="menuLabel" for="resolutions">Méthode de calcul</label>
                         <select class="menuInput" name="resolutions" id="resolutions">
 						    <option value="RungeKutta">Runge-Kutta (RK4)</option>
