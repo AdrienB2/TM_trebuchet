@@ -20,7 +20,7 @@ var alphaChart = new Chart(alphaChartCan, {
         scales: {
             y: {
                 title: {
-                    text: "αlpha [rad]",
+                    text: "α [rad]",
                     display: true,
                     align: "center",
                 },
@@ -57,7 +57,7 @@ var betaChart = new Chart(betaChartCan, {
         scales: {
             y: {
                 title: {
-                    text: "βeta [rad]",
+                    text: "β [rad]",
                     display: true,
                     align: "center",
                 },
@@ -94,7 +94,7 @@ var gammaChart = new Chart(gammaChartCan, {
         scales: {
             y: {
                 title: {
-                    text: "γamma [rad]",
+                    text: "γ [rad]",
                     display: true,
                     align: "center",
                 },
