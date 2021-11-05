@@ -27,7 +27,7 @@ var alphaChart = new Chart(alphaChartCan, {
             },
             x: {
                 title: {
-                    text: "Temps [s]",
+                    text: "temps [s]",
                     display: true,
                     align: "center",
                 },
@@ -64,7 +64,7 @@ var betaChart = new Chart(betaChartCan, {
             },
             x: {
                 title: {
-                    text: "Temps [s]",
+                    text: "temps [s]",
                     display: true,
                     align: "center",
                 },
@@ -101,7 +101,7 @@ var gammaChart = new Chart(gammaChartCan, {
             },
             x: {
                 title: {
-                    text: "Temps [s]",
+                    text: "temps [s]",
                     display: true,
                     align: "center",
                 },
@@ -131,14 +131,14 @@ var xChart = new Chart(xChartCan, {
         scales: {
             y: {
                 title: {
-                    text: "Position sur x [m]",
+                    text: "position sur x [m]",
                     display: true,
                     align: "center",
                 },
             },
             x: {
                 title: {
-                    text: "Temps [s]",
+                    text: "temps [s]",
                     display: true,
                     align: "center",
                 },
@@ -168,14 +168,14 @@ var yChart = new Chart(yChartCan, {
         scales: {
             y: {
                 title: {
-                    text: "Position sur y [m]",
+                    text: "position sur y [m]",
                     display: true,
                     align: "center",
                 },
             },
             x: {
                 title: {
-                    text: "Temps [s]",
+                    text: "temps [s]",
                     display: true,
                     align: "center",
                 },
@@ -205,14 +205,14 @@ var speedChart = new Chart(speedChartCan, {
         scales: {
             y: {
                 title: {
-                    text: "Vitesse [m/s]",
+                    text: "vitesse [m/s]",
                     display: true,
                     align: "center",
                 },
             },
             x: {
                 title: {
-                    text: "Temps [s]",
+                    text: "temps [s]",
                     display: true,
                     align: "center",
                 },
@@ -243,14 +243,14 @@ var energyChart = new Chart(energyChartCan, {
             y: {
                 beginAtZero: true,
                 title: {
-                    text: "Energie [J]",
+                    text: "énergie [J]",
                     display: true,
                     align: "center",
                 },
             },
             x: {
                 title: {
-                    text: "Temps [s]",
+                    text: "temps [s]",
                     display: true,
                     align: "center",
                 },
