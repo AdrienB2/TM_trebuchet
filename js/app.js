@@ -97,7 +97,6 @@ var animPoints = new Array(); //variable qui stocke les points à tracer pour le
 var sauv; //sauvegarde du pas
 var ral; //coefficient de ralenti
 
-
 //booléens
 var Pause; //indique si la simulation est en pause ou non
 var Ralenti; //indique si la simulation est ralentie ou non
@@ -134,8 +133,9 @@ function inc(vx, vy) {
 };
 
 //0.3. inversion de matrice (trouvé sur Internet)
+//DéBUT DU CODE 
 function matrix_invert(M) {
-    // I use gaussian Elimination to calculate the inverse:
+    // I use guassian Elimination to calculate the inverse:
     // (1) 'augment' the matrix (left) by the identity (on the right)
     // (2) Turn the matrix on the left into the identity by elemetry row ops
     // (3) The matrix on the right is the inverse (was the identity matrix)
@@ -240,6 +240,7 @@ function matrix_invert(M) {
     //matrix I should be the inverse:
     return I;
 }
+//FIN DU CODE
 
 //0.4. calculs des accélérations angulaires
 function calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma) {
@@ -275,6 +276,7 @@ function calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma) {
         [c21, c22, c23],
         [c31, c32, c33],
     ];
+    
     I = matrix_invert(T);
 
     //calcul des nouvelles accélérations avec I 
@@ -290,6 +292,7 @@ function calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma) {
 };
 
 //====== 1. FONCTIONS POUR LES CALCULS (utilisées dans la fonction "calculate") ======//
+
 //1.1. méthodes d'intégration numérique pour les angles du trébuchet
 //1.1.1. méthode d'Euler
 function EulerMethod(dt) {
@@ -324,7 +327,7 @@ function EulerMethod(dt) {
     d1alpha += dt * d2alpha;
     d1beta += dt * d2beta;
     d1gamma += dt * d2gamma;
-}
+};
 //1.1.2. méthode de Heun
 function Heun(dt) {
     let p = calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma);
@@ -370,7 +373,7 @@ function Heun(dt) {
     d1alpha += dt * d2alpha;
     d1beta += dt * d2beta;
     d1gamma += dt * d2gamma;
-}
+};
 //1.1.3. méthode de Runge-Kutta (RK4)
 function RungeKutta(dt) {
     let p = calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma);
@@ -505,6 +508,7 @@ function balistique(vi, incl, xi, yi) {
 };
 
 //====== 2. FONCTIONS POUR L'AFFICHAGE (utilisée dans la fonction "Display") ======//
+
 //2.1. affichage du trébuchet et de la trajectoire de la balle
 function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale, xmin) {
     //vide le canvas avant d'afficher la nouvelle frame
@@ -627,13 +631,12 @@ function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale, xmin) {
     document.getElementById("speedLabel").innerText = vitesse.toFixed(3);
     document.getElementById("RmaxLabel").innerText = (Rmax).toFixed(3);
     document.getElementById("timeLabel").innerText = (simDT * i).toFixed(3);
+    document.getElementById("energieLabel").innerText = Energy.toFixed(3);
     
     //angles alpha, beta, gamma du trébuchet
     document.getElementById("alphaLabel").innerText = (((alpha % 2) * PI * 180) / PI).toFixed(3);
     document.getElementById("betaLabel").innerText = (((beta % 2) * PI * 180) / PI).toFixed(3);
     document.getElementById("gammaLabel").innerText = (((gamma % 2) * PI * 180) / PI).toFixed(3);
-    
-    document.getElementById("energieLabel").innerText = Energy.toFixed(3);
 
     //affichage de la flèche indiquant le sens du vent
     if (vvent != 0) {
@@ -645,10 +648,10 @@ function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale, xmin) {
             canvas_arrow(90, 90, 75, (ivent / 180) * PI);
         } else {
             canvas_arrow(90, 90, 75, (ivent / 180) * PI + PI);
-        }
-    }
+        };
+    };
 
-}
+};
 
 //affichage d'une flèche sur le canvas
 function canvas_arrow(centerx, centery, length, angle) {
@@ -680,8 +683,10 @@ function canvas_arrow(centerx, centery, length, angle) {
         endy - Math.sin(angle + endangle - PI) * endlength
     );
     ctx.stroke();
-}
+};
+
 //====== 3. FONCTIONS PRINCIPALES ======//
+
 //3.1. fonction faisant la simulation
 function calculate() {
     //SIMULATION DU TREBUCHET//
@@ -697,9 +702,9 @@ function calculate() {
     while (beta - alpha - PI / 2 < releaseAngle && t <= tmax) {
         //simulation jusqu'à ce que l'inclinaison de la vitesse corresponde à l'angle de libération
         if(isNaN(alpha)||isNaN(beta)||isNaN(gamma)||isNaN(d1alpha)||isNaN(d1beta)||isNaN(d1gamma)){break};
+        
         //calcul de la première position, vitesse et inclinaison du projectile
         var x = - l2 * Math.sin(alpha) - l5 * Math.sin(beta - alpha);
-
         var y = l3 + l2 * Math.cos(alpha) - l5 * Math.cos(beta - alpha);
         
         angles.push({a: alpha, b: beta, c: gamma});
@@ -715,7 +720,7 @@ function calculate() {
         E = (1 / 2) * (m1 * (l1 ** 2 + l4 ** 2) + mb * lb ** 2 - 2 * m1 * l1 * l4 * Math.cos(gamma) + m2 * (l2 ** 2 + l5 ** 2) - 2 * m2 * l2 * l5 * Math.cos(beta)) * d1alpha ** 2 +
             (1 / 2) * m1 * l4 ** 2 * d1gamma ** 2 + (1 / 2) * m2 * l5 ** 2 * d1beta ** 2 + m1 * (l4 ** 2 - l1 * l4 * Math.cos(gamma)) * d1alpha * d1gamma +
             m2 * (-(l5 ** 2) + l2 * l5 * Math.cos(beta)) * d1alpha * d1beta + g *(-m1 * l1 + m2 * l2 + mb * lb) * Math.cos(alpha) - g * m2 * l5 * Math.cos(beta - alpha) +
-            g * m1 * l4 * Math.cos(gamma + alpha)+ g*(m1+m2+mb) * l3;
+            g * m1 * l4 * Math.cos(gamma + alpha)+ g * (m1 + m2 + mb) * l3;
         ETreb.push(E);
         
         switch (methode) {
@@ -737,7 +742,7 @@ function calculate() {
     i_release = i;
 
     //calculs de la portée
-    Rmax = (2*vitesses[i_release]**2*Math.cos(inclinaisons[i_release]*Math.PI/180)*Math.sin(inclinaisons[i_release]*Math.PI/180))/g;
+    Rmax = (2 * vitesses[i_release] ** 2 * Math.cos(inclinaisons[i_release] * PI / 180) * Math.sin(inclinaisons[i_release] * PI/180)) / g;
 
     //SIMULATION DE LA BALISTIQUE//
     balistique(vitesses[i_release], inclinaisons[i_release], positionsx[i_release], positionsy[i_release]);
@@ -767,7 +772,7 @@ function calculate() {
         E = (1 / 2) * (m1 * (l1 ** 2 + l4 ** 2) + mb * lb ** 2 - 2 * m1 * l1 * l4 * Math.cos(gamma) + m2 * (l2 ** 2 + l5 ** 2) - 2 * m2 * l2 * l5 * Math.cos(beta)) * d1alpha ** 2 +
             (1 / 2) * m1 * l4 ** 2 * d1gamma ** 2 + (1 / 2) * m2 * l5 ** 2 * d1beta ** 2 + m1 * (l4 ** 2 - l1 * l4 * Math.cos(gamma)) * d1alpha * d1gamma +
             m2 * (-(l5 ** 2) + l2 * l5 * Math.cos(beta)) * d1alpha * d1beta + g *(-m1 * l1 + m2 * l2 + mb * lb) * Math.cos(alpha) - g * m2 * l5 * Math.cos(beta - alpha) +
-            g * m1 * l4 * Math.cos(gamma + alpha) + g*(m1+m2+mb)*l3;
+            g * m1 * l4 * Math.cos(gamma + alpha) + g * (m1 + m2 + mb) * l3;
 
         ETreb.push(E);
     };
@@ -777,13 +782,13 @@ function calculate() {
     for(let a = 0 ; a <= i ; a++){
         if(a <= i_release){
             Energies.push(ETreb[a]);
-        }else{
+        } else{
             if(a <= i_continue){
                 Energies.push(ETreb[a] + (1 / 2) * m2 * vitesses[a] ** 2 + m2 * g * positionsy[a]);
-            }else{
-                let b=1;
-                while(isNaN(ETreb[ETreb.length - b])){
-                    b+=1;
+            } else{
+                 let b=1;
+                 while(isNaN(ETreb[ETreb.length - b])){
+                     b+=1;
                 };
                 Energies.push(ETreb[ETreb.length - b] + (1 / 2) * m2 * vitesses[a] ** 2 + m2 * g * positionsy[a]);
             };
@@ -797,8 +802,8 @@ function Scale() {
     if (xmin > miax(positionsx)[1]) {
         xmin = miax(positionsx)[1];
     };
-    if(xmax < l1+l2+l4+l5){
-        xmax = l1+l2+l4+l5
+    if(xmax < l1 + l2 + l4 + l5){
+        xmax = l1 + l2 + l4 + l5
     };
     if (xmax < miax(positionsx)[0]) {
         xmax = miax(positionsx)[0];
@@ -831,23 +836,23 @@ function displaySim(i, slowMotion) {
             if (i <= i_release || focusMode) {
                 currentScale = trebuchetScale;
                 //appelle la fonction qui dessine la frame sur la canvas
-                draw(currentAlpha,currentBeta,currentgamma,{x: positionsx[i], y: positionsy[i]},vitesses[i],Energies[i],i,currentScale, -(l1+l2+l4+l5));
+                draw(currentAlpha, currentBeta, currentgamma, {x: positionsx[i], y: positionsy[i]}, vitesses[i], Energies[i], i, currentScale, -(l1 + l2 + l4 + l5));
             } else {
                 //sinon, on diminue le scale petit-à-petit jusqu'à ce qu'il affiche toute la simulation
                 if (scale < currentScale-5) {
                     currentScale -= 5;
-                }
+                };
                 else {
                     currentScale = scale;
-                }
+                };
                 //appelle la fonction qui dessine la frame sur la canvas
-                draw(currentAlpha,currentBeta,currentgamma,{x: positionsx[i], y: positionsy[i]},vitesses[i],Energies[i],i,currentScale, xmin);
-            }
+                draw(currentAlpha, currentBeta, currentgamma, {x: positionsx[i], y: positionsy[i]}, vitesses[i], Energies[i], i, currentScale, xmin);
+            };
             
             //incrémente la variable i pour afficher la frame suivante au prochain tour de boucle
             i += 1;
             sauv = i; //sauvegarde l'itération (utile pour la pause ou le ralenti)
-        }
+        };
         //si la simulation est finie
         else {
             //réactive les boutons qui avaient été désactivés dans la fonction startSim()
@@ -862,7 +867,7 @@ function displaySim(i, slowMotion) {
             //affiche les graphiques sur l'autre onglet
             drawGraph();
         };
-    }, simDT * 1000 * slowMotion);
+    }; simDT * 1000 * slowMotion);
 };
 
 //3.4. fonction qui vérifie et modifie les données avant le lancement de la simulation
@@ -938,12 +943,13 @@ function Initialisation() {
         l5 == 0) {
         window.alert("Valeurs aberrantes ou impossibles. La simulation ne peut pas fonctionner.");
         Erreur = true;
-    }
+    };
     //conversion de degrés en radians
     releaseAngle *= PI / 180;
-}
+};
 
 //====== 4. FONCTIONS POUR LES BOUTONS ======//
+
 //4.1. lance la simulation
 function startSim() {
     //initialise la simulation
@@ -965,8 +971,8 @@ function startSim() {
     } else {
         //sinon en arrête
         return;
-    }
-}
+    };
+};
 
 //4.2. stoppe la simulation
 function Stop() {
@@ -981,7 +987,7 @@ function Stop() {
     
     SimulationStatus = false;
     drawGraph();
-}
+};
 
 //4.3. arrête ou relance la simulation
 function OnOff() {
@@ -1026,7 +1032,7 @@ function slowMotion() {
             displaySim(sauv, ral);
             Ralenti = false;
             document.getElementById("btnSlowMotion").value = "Ralenti";
-        }
+        };
     } else if (Pause == true) {
         if (Ralenti == false) {
             ral = Math.abs(document.getElementById("ralenticurseur").value);
@@ -1036,13 +1042,14 @@ function slowMotion() {
             ral = 1;
             Ralenti = false;
             document.getElementById("btnSlowMotion").value = "Ralenti";
-        }
-    }
+        };
+    };
     e_ral.innerHTML = `Ralenti: ${ral}x`;
     document.getElementById("btnSlowMotion").disabled = false;
     document.getElementById("btnPause").disabled = false;
     document.getElementById("btnStop").disabled = false;
-}
+};
+
 //4.4.2. fonction pour le curseur ralenti
 function RalentiCursorFunction() {
 
@@ -1060,8 +1067,8 @@ function RalentiCursorFunction() {
         document.getElementById("btnPause").disabled = false;
         document.getElementById("btnSlowMotion").disabled = false;
         document.getElementById("btnStop").disabled = false;
-    }
-}
+    };
+};
 
 //4.5. redimensionne la simulation
 function Resize() {
@@ -1076,7 +1083,7 @@ function Resize() {
         scale = cx;
     } else {
         scale = cy;
-    }
+    };
     if (Pause == true || SimulationStatus == false) {
         draw(angles[sauv - 1].a, 
              angles[sauv - 1].b, 
@@ -1088,16 +1095,15 @@ function Resize() {
              sauv - 1, 
              scale, 
              xmin);
-    }
-}
+    };
+};
 window.onresize = function () {
     Resize()
-}
+};
 //4.6 changement de mode de focalisation
 function focusModeChange() {
     focusMode = document.getElementById("focus").checked;
-    document.getElementById("focusModeLabel").innerHTML = focusMode?"On":"Off"
-    
+    document.getElementById("focusModeLabel").innerHTML = focusMode?"On":"Off"    
 };
 
 //====== FIN ======//
