@@ -24,6 +24,9 @@ var alphaChart = new Chart(alphaChartCan, {
                     display: true,
                     align: "center",
                 },
+                grid: {
+                    color: '#666666'
+                }
             },
             x: {
                 title: {
@@ -31,6 +34,9 @@ var alphaChart = new Chart(alphaChartCan, {
                     display: true,
                     align: "center",
                 },
+                grid: {
+                    color: '#666666'
+                }
             },
         },
         plugins: {
@@ -61,6 +67,9 @@ var betaChart = new Chart(betaChartCan, {
                     display: true,
                     align: "center",
                 },
+                grid: {
+                    color: '#666666'
+                }
             },
             x: {
                 title: {
@@ -68,6 +77,9 @@ var betaChart = new Chart(betaChartCan, {
                     display: true,
                     align: "center",
                 },
+                grid: {
+                    color: '#666666'
+                }
             },
         },
         plugins: {
@@ -98,6 +110,9 @@ var gammaChart = new Chart(gammaChartCan, {
                     display: true,
                     align: "center",
                 },
+                grid: {
+                    color: '#666666'
+                }
             },
             x: {
                 title: {
@@ -105,6 +120,9 @@ var gammaChart = new Chart(gammaChartCan, {
                     display: true,
                     align: "center",
                 },
+                grid: {
+                    color: '#666666'
+                }
             },
         },
         plugins: {
@@ -135,6 +153,9 @@ var xChart = new Chart(xChartCan, {
                     display: true,
                     align: "center",
                 },
+                grid: {
+                    color: '#666666'
+                }
             },
             x: {
                 title: {
@@ -142,6 +163,9 @@ var xChart = new Chart(xChartCan, {
                     display: true,
                     align: "center",
                 },
+                grid: {
+                    color: '#666666'
+                }
             },
         },
         plugins: {
@@ -172,6 +196,9 @@ var yChart = new Chart(yChartCan, {
                     display: true,
                     align: "center",
                 },
+                grid: {
+                    color: '#666666'
+                }
             },
             x: {
                 title: {
@@ -179,6 +206,9 @@ var yChart = new Chart(yChartCan, {
                     display: true,
                     align: "center",
                 },
+                grid: {
+                    color: '#666666'
+                }
             },
         },
         plugins: {
@@ -209,6 +239,9 @@ var speedChart = new Chart(speedChartCan, {
                     display: true,
                     align: "center",
                 },
+                grid: {
+                    color: '#666666'
+                }
             },
             x: {
                 title: {
@@ -216,7 +249,10 @@ var speedChart = new Chart(speedChartCan, {
                     display: true,
                     align: "center",
                 },
-            },
+                grid: {
+                    color: '#666666'
+                }
+            }
         },
         plugins: {
             legend: {
@@ -247,6 +283,9 @@ var energyChart = new Chart(energyChartCan, {
                     display: true,
                     align: "center",
                 },
+                grid: {
+                    color: '#666666'
+                }
             },
             x: {
                 title: {
@@ -254,6 +293,9 @@ var energyChart = new Chart(energyChartCan, {
                     display: true,
                     align: "center",
                 },
+                grid: {
+                    color: '#666666'
+                }
             },
         },
         plugins: {
