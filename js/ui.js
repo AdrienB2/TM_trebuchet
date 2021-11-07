@@ -34,7 +34,7 @@ function switchColorMode(switch2Dark) {
         trebuchetColor2: switch2Dark ? "Peru":"Peru",
         trebuchetColor3: switch2Dark ? "Saddlebrown":"Saddlebrown",
         masseColor: switch2Dark ? "LightSlateGray":"LightSlateGray",
-        groundColor: switch2Dark ? "#00a800":"#00a800",
+        groundColor: switch2Dark ? "#00ff7f":"#228b22",
         projectilColor: switch2Dark ? "LightGray":"DarkSlateGray",
         previousPath1: switch2Dark ? "Violet":"Magenta",
         previousPath2: switch2Dark ? "Magenta":"DarkMagenta",
