@@ -38,7 +38,7 @@ function switchColorMode(switch2Dark) {
         projectilColor: switch2Dark ? "LightGray":"DarkSlateGray",
         previousPath1: switch2Dark ? "Violet":"Magenta",
         previousPath2: switch2Dark ? "Magenta":"DarkMagenta",
-        directionVentColor: switch2Dark ? "aqua":"RoyalBlue",
+        directionVentColor: switch2Dark ? "aqua":"MidnightBlue",
         speedLabelColor: switch2Dark ? "Magenta":"DarkMagenta",
         alphaLabelColor: switch2Dark ? "red":"red",
         betaLabelColor: switch2Dark ? "DodgerBlue":"blue",
