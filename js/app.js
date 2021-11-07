@@ -119,10 +119,10 @@ function miax(liste) {
             max = liste[i];
         } else if (liste[i] < min) {
             min = liste[i];
-        }
-    }
+        };
+    };
     return [max, min];
-}
+};
 
 //0.2. fonction qui donne l'inclinaison
 function inc(vx, vy) {
@@ -130,8 +130,8 @@ function inc(vx, vy) {
         return (Math.atan(vy / vx) / PI) * 180;
     } else {
         return 180 + (Math.atan(vy / vx) / PI) * 180;
-    }
-}
+    };
+};
 
 //0.3. inversion de matrice (trouvé sur Internet)
 function matrix_invert(M) {
@@ -287,7 +287,7 @@ function calculsAccAngu(alpha, beta, gamma, d1alpha, d1beta, d1gamma) {
         b: d2beta,
         c: d2gamma,
     };
-}
+};
 
 //====== 1. FONCTIONS POUR LES CALCULS (utilisées dans la fonction "calculate") ======//
 //1.1. méthodes d'intégration numérique pour les angles du trébuchet
@@ -407,7 +407,7 @@ function RungeKutta(dt) {
     d1alpha += dt * ((p.a + 2 * q.a + 2 * r.a + s.a) / 6);
     d1beta  += dt * ((p.b + 2 * q.b + 2 * r.b + s.b) / 6);
     d1gamma += dt * ((p.c + 2 * q.c + 2 * r.c + s.c) / 6);
-}
+};
 
 //1.2. balistique
 function balistique(vi, incl, xi, yi) {
@@ -429,19 +429,19 @@ function balistique(vi, incl, xi, yi) {
     function ft(vx, vy) { //force de traînée
         let v = ((-vx + vvent * Math.cos((ivent / 180) * PI)) ** 2 + (-vy + vvent * Math.sin((ivent / 180) * PI)) ** 2) ** 0.5;
         return (cf * rho * air * v ** 2) / 2;
-    }
+    };
 
     function fm(vx, vy) { //effet Magnus
         let v = ((-vx + vvent * Math.cos((ivent / 180) * PI)) ** 2 + (-vy + vvent * Math.sin((ivent / 180) * PI)) ** 2) ** 0.5;
         return ((0.5 * PI * rho * r ** 3 * w) / 180) * PI * v;
-    }
+    };
 
     function a(vx, vy) { //accélération du projectile dans l'air
         return {
             x: (ft(vx, vy) * Math.cos((inclrel / 180) * PI) - fm(vx, vy) * Math.sin((inclrel / 180) * PI)) /m,
             y: (ft(vx, vy) * Math.sin((inclrel / 180) * PI) - m * g + fm(vx, vy) * Math.cos((inclrel / 180) * PI))/m,
         };
-    }
+    };
 
     function RungeKuttaBalistique() {
         let p = a(vx, vy);
@@ -452,7 +452,7 @@ function balistique(vi, incl, xi, yi) {
         y += (1 / 2) * ((p.y + q.y + r.y) / 3) * d ** 2 + vy * d;
         vx += (d * (p.x + 2 * q.x + 2 * r.x + s.x)) / 6;
         vy += (d * (p.y + 2 * q.y + 2 * r.y + s.y)) / 6;
-    }
+    };
 
     function EulerBalistique() {
         ax = a(vx, vy).x;
@@ -461,8 +461,8 @@ function balistique(vi, incl, xi, yi) {
         y += (1 / 2) * ay * d ** 2 + vy * d;
         vx += ax * d;
         vy += ay * d;
-    }
-
+    };
+    
     function HeunBalistique() {
         let p = a(vx, vy);
         let q = a(vx + p.x * d, vy + p.y * d);
@@ -472,7 +472,8 @@ function balistique(vi, incl, xi, yi) {
         y += (1 / 2) * ay * d ** 2 + vy * d;
         vx += ax * d;
         vy += ay * d;
-    }
+    };
+    
     while (y >= 0 && t <= tmax) {
         switch (methode) {
             case "RungeKutta":
@@ -484,7 +485,7 @@ function balistique(vi, incl, xi, yi) {
             default:
                 HeunBalistique();
                 break;
-        }
+        };
 
         v = (vx ** 2 + vy ** 2) ** 0.5;
         vitesses.push(v); 
@@ -497,11 +498,11 @@ function balistique(vi, incl, xi, yi) {
 
         t += d;
         i += 1;
-    }
-    else if (t = tmax){
-        window.alert("Temps de simulation trop long");
-    }
-}
+    };
+    if (t >= tmax){
+        window.alert("la simulation étant trop longue, le site ne pourra pas la montrer entièrement.");
+    };
+};
 
 //====== 2. FONCTIONS POUR L'AFFICHAGE (utilisée dans la fonction "Display") ======//
 //2.1. affichage du trébuchet et de la trajectoire de la balle
@@ -602,8 +603,8 @@ function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale, xmin) {
                 (-xmin * 1.1 + animPoints[k].x) * scale,
                 simulation.height - animPoints[k].y * scale, 0.8, 0, 2 * PI);
             ctx.fill();
-        }
-    }
+        };
+    };
     if (i >= positionsx.length - 1) {
         for (var k = 0; k < positionsx.length;) {
             ctx.beginPath();
@@ -617,8 +618,8 @@ function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale, xmin) {
                 x: positionsx[k],
                 y: positionsy[k],
             });
-        }
-    }
+        };
+    };
 
     //affichage des données
     document.getElementById("xposLabel").innerText = pos.x.toFixed(3);
@@ -695,7 +696,7 @@ function calculate() {
     m2 += masseFronde;
     while (beta - alpha - PI / 2 < releaseAngle && t <= tmax) {
         //simulation jusqu'à ce que l'inclinaison de la vitesse corresponde à l'angle de libération
-        if(isNaN(alpha)||isNaN(beta)||isNaN(gamma)||isNaN(d1alpha)||isNaN(d1beta)||isNaN(d1gamma)){break}
+        if(isNaN(alpha)||isNaN(beta)||isNaN(gamma)||isNaN(d1alpha)||isNaN(d1beta)||isNaN(d1gamma)){break};
         //calcul de la première position, vitesse et inclinaison du projectile
         var x = - l2 * Math.sin(alpha) - l5 * Math.sin(beta - alpha);
 
@@ -746,7 +747,7 @@ function calculate() {
     m2 = masseFronde;
 
     while (i_continue < i && (l3 + l2 * Math.cos(alpha) - l5 * Math.cos(beta - alpha) >= 0)) {
-        if(isNaN(alpha)||isNaN(beta)||isNaN(gamma)||isNaN(d1alpha)||isNaN(d1beta)||isNaN(d1gamma)){break}
+        if(isNaN(alpha)||isNaN(beta)||isNaN(gamma)||isNaN(d1alpha)||isNaN(d1beta)||isNaN(d1gamma)){break};
         i_continue += 1;
         switch (methode) {
             case "RungeKutta":
@@ -757,7 +758,7 @@ function calculate() {
                 break;
             default:
                 Heun(simDT);
-        }
+        };
         //ajout dans les listes
         angles.push({a: alpha, b: beta, c: gamma});
         d1angles.push({a: d1alpha, b: d1beta, c: d1gamma});
@@ -769,7 +770,7 @@ function calculate() {
             g * m1 * l4 * Math.cos(gamma + alpha) + g*(m1+m2+mb)*l3;
 
         ETreb.push(E);
-    }
+    };
     m2 = Math.abs(e_m2.value);
 
     //calcul de l'énergie totale
@@ -786,25 +787,16 @@ function calculate() {
                 };
                 Energies.push(ETreb[ETreb.length - b] + (1 / 2) * m2 * vitesses[a] ** 2 + m2 * g * positionsy[a]);
             };
-        }
-    }
-}
+        };
+    };
+};
 
 //3.2. fonction pour trouver le bon coefficient d'affichage
 function Scale() {
     //calcul du coefficient de zoom pour l'affichage
     if (xmin > miax(positionsx)[1]) {
         xmin = miax(positionsx)[1];
-    }
-    
-    /*if (xmin < 0) {
-        if (xmin > miax(positionsx)[1]) {
-            xmin = miax(positionsx)[1];
-        }
-    } else {
-        xmin = 0;
-    }*/
-    
+    };
     if(xmax < l1+l2+l4+l5){
         xmax = l1+l2+l4+l5
     };
@@ -815,26 +807,10 @@ function Scale() {
         ymax = miax(positionsy)[0];
     };
     
-    /*if (l1 + l4 + r1 < l2 + l5 + r2) {
-        if (xmax < l2 + l5 + r2) {
-            xmax = l2 + l5 + r2;
-        }
-        if (ymax < l3 + l2 + l5 + r2) {
-            ymax = l3 + l2 + l5 + r2;
-        }
-    } else {
-        if (xmax < l1 + l4 + r1) {
-            xmax = l1 + l4 + r1;
-        }
-        if (ymax < l3 + l1 + l4 + r1) {
-            ymax = l1 + l4 + r1;
-        }
-    }*/
-    
     var cx = simulation.width / (1.1 * (xmax - xmin));
     var cy = simulation.height / (1.1 * ymax);
     scale = (cx <= cy) ? cx : cy;
-}
+};
 
 //3.3. affichage du résultat sur le canvas//
 function displaySim(i, slowMotion) {
@@ -885,9 +861,9 @@ function displaySim(i, slowMotion) {
             SimulationStatus = false;
             //affiche les graphiques sur l'autre onglet
             drawGraph();
-        }
+        };
     }, simDT * 1000 * slowMotion);
-}
+};
 
 //3.4. fonction qui vérifie et modifie les données avant le lancement de la simulation
 function Initialisation() {
@@ -1022,12 +998,12 @@ function OnOff() {
         displaySim(sauv, ral);
         Pause = false;
         document.getElementById("btnPause").value = "Pause";
-    }
+    };
 
     document.getElementById("btnPause").disabled = false;
     document.getElementById("btnSlowMotion").disabled = false;
     document.getElementById("btnStop").disabled = false;
-}
+};
 
 //4.4. ralenti
 //4.4.1. ralentit la simulation
