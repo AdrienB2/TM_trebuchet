@@ -498,6 +498,9 @@ function balistique(vi, incl, xi, yi) {
         t += d;
         i += 1;
     }
+    else if (t = tmax){
+        window.alert("Temps de simulation trop long");
+    }
 }
 
 //====== 2. FONCTIONS POUR L'AFFICHAGE (utilisée dans la fonction "Display") ======//
@@ -618,27 +621,17 @@ function draw(alpha, beta, gamma, pos, vitesse, Energy, i, scale, xmin) {
     }
 
     //affichage des données
-    
-    /*if (l2 + l5 + r2 > l1 + l4 + r1) {
-        document.getElementById("xposLabel").innerText = (pos.x - (l2 + l5 + r2)).toFixed(3);
-    } else {
-        document.getElementById("xposLabel").innerText = (pos.x - (l1 + l4 + r1)).toFixed(3);
-    }*/
-    
     document.getElementById("xposLabel").innerText = pos.x.toFixed(3);
-
     document.getElementById("yposLabel").innerText = pos.y.toFixed(3);
-
     document.getElementById("speedLabel").innerText = vitesse.toFixed(3);
-
     document.getElementById("RmaxLabel").innerText = (Rmax).toFixed(3);
-
     document.getElementById("timeLabel").innerText = (simDT * i).toFixed(3);
     
     //angles alpha, beta, gamma du trébuchet
     document.getElementById("alphaLabel").innerText = (((alpha % 2) * PI * 180) / PI).toFixed(3);
     document.getElementById("betaLabel").innerText = (((beta % 2) * PI * 180) / PI).toFixed(3);
     document.getElementById("gammaLabel").innerText = (((gamma % 2) * PI * 180) / PI).toFixed(3);
+    
     document.getElementById("energieLabel").innerText = Energy.toFixed(3);
 
     //affichage de la flèche indiquant le sens du vent
@@ -704,13 +697,6 @@ function calculate() {
         //simulation jusqu'à ce que l'inclinaison de la vitesse corresponde à l'angle de libération
         if(isNaN(alpha)||isNaN(beta)||isNaN(gamma)||isNaN(d1alpha)||isNaN(d1beta)||isNaN(d1gamma)){break}
         //calcul de la première position, vitesse et inclinaison du projectile
-        
-        /*if (l2 + l5 + r2 > l1 + l4 + r1) {
-            var x = l2 + l5 + r2 - l2 * Math.sin(alpha) - l5 * Math.sin(beta - alpha);
-        } else {
-            var x = l1 + l4 + r1 - l2 * Math.sin(alpha) - l5 * Math.sin(beta - alpha);
-        }*/
-        
         var x = - l2 * Math.sin(alpha) - l5 * Math.sin(beta - alpha);
 
         var y = l3 + l2 * Math.cos(alpha) - l5 * Math.cos(beta - alpha);
@@ -957,7 +943,7 @@ function Initialisation() {
 
     //vérifie la validité des valeurs
     if (l3 / l2 > 1) {
-        window.alert( "Valeur.s aberrante.s ou impossible.s. La simulation ne peut pas fonctionner.");
+        window.alert( "Valeurs aberrantes ou impossibles ; la simulation ne peut pas fonctionner.");
         Erreur = true;
     }
     alpha = PI - Math.acos(l3 / l2);
@@ -1135,14 +1121,6 @@ window.onresize = function () {
 function focusModeChange() {
     focusMode = document.getElementById("focus").checked;
     document.getElementById("focusModeLabel").innerHTML = focusMode?"On":"Off"
-    
-    /*if (Pause == true || SimulationStatus == false) {
-        if(focusMode){
-            draw(angles[sauv - 1].a, angles[sauv - 1].b, angles[sauv - 1].c, { x: positionsx[sauv - 1], y: positionsy[sauv - 1]}, vitesses[sauv - 1], Energies[sauv - 1], sauv - 1, trebuchetScale)
-        }else{
-            draw(angles[sauv - 1].a, angles[sauv - 1].b, angles[sauv - 1].c, { x: positionsx[sauv - 1], y: positionsy[sauv - 1]}, vitesses[sauv - 1], Energies[sauv - 1], sauv - 1, scale)
-        };
-    };*/
     
 };
 
