@@ -42,9 +42,9 @@ function switchColorMode(switch2Dark) {
         speedLabelColor: switch2Dark ? "Magenta":"DarkMagenta",
         alphaLabelColor: switch2Dark ? "red":"red",
         betaLabelColor: switch2Dark ? "DodgerBlue":"blue",
-        gammaLabelColor: switch2Dark ? "LightGreen":"green",
-        energieLabelColor: switch2Dark ? "orange":"orange",
-        rMaxLabelColor: switch2Dark ? "goldenrod":"goldenrod",
+        gammaLabelColor: switch2Dark ? "Lime":"green",
+        energieLabelColor: switch2Dark ? "gold":"DarkOrange",
+        rMaxLabelColor: switch2Dark ? "Tomato":"Tomato",
     }
     //changement de la couleur de fond et de la couleur des textes
     var htmlELement = document.querySelector("html")
